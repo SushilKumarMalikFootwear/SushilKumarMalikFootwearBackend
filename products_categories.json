@@ -1,0 +1,106 @@
+[
+    {
+        "_id": "Television",
+        "total": 12
+    },
+    {
+        "_id": "Heater",
+        "total": 2
+    },
+    {
+        "_id": "Headphone",
+        "total": 12
+    },
+    {
+        "_id": "Tablet",
+        "total": 9
+    },
+    {
+        "_id": "SmartWatch",
+        "total": 9
+    },
+    {
+        "_id": "AC",
+        "total": 2
+    },
+    {
+        "_id": "Power Bank",
+        "total": 9
+    },
+    {
+        "_id": "FootBall",
+        "total": 9
+    },
+    {
+        "_id": "Laptop",
+        "total": 10
+    },
+    {
+        "_id": "Sports Shoes",
+        "total": 9
+    },
+    {
+        "_id": "Cricket",
+        "total": 9
+    },
+    {
+        "_id": "Home Theatre",
+        "total": 2
+    },
+    {
+        "_id": "EarPhones",
+        "total": 2
+    },
+    {
+        "_id": "VolleyBall",
+        "total": 2
+    },
+    {
+        "_id": "Game Zone",
+        "total": 10
+    },
+    {
+        "_id": "smart home",
+        "total": 3
+    },
+    {
+        "_id": "Phone",
+        "total": 12
+    },
+    {
+        "_id": "Cycling",
+        "total": 9
+    },
+    {
+        "_id": "console",
+        "total": 9
+    },
+    {
+        "_id": "computer",
+        "total": 6
+    },
+    {
+        "_id": "Refrigerator",
+        "total": 2
+    },
+    {
+        "_id": "Gym",
+        "total": 9
+    },
+    {
+        "_id": "Phone Cover",
+        "total": 9
+    },
+    {
+        "_id": "Badminton",
+        "total": 9
+    },
+    {
+        "_id": "Camera",
+        "total": 4
+    },
+    {
+        "_id": "Washing Machine",
+        "total": 2
+    }
+]

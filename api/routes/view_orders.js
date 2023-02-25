@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+const {view_single_order,view_orders_by_user,view_all_orders,view_orders_by_product_id,view_order_by_order_status} = require('../../controller/orders');
+const {VIEW_SINGLE_ORDER,VIEW_ORDERS_BY_USER,VIEW_ALL_ORDERS,VIEW_ORDERS_BY_PRODUCT_ID,VIEW_ORDERS_BY_ORDER_STATUS} = require('../../utils/config').ROUTES.ORDERS;
+router.get(VIEW_ALL_ORDERS,view_all_orders);
+router.post(VIEW_ORDERS_BY_USER,view_orders_by_user);
+router.post(VIEW_ORDERS_BY_PRODUCT_ID,view_orders_by_product_id);
+router.get(VIEW_ORDERS_BY_ORDER_STATUS,view_order_by_order_status);
+router.post(VIEW_SINGLE_ORDER,view_single_order);
+module.exports = router;

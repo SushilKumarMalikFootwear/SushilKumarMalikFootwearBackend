@@ -1,0 +1,17 @@
+const express = require('express');
+const router = express.Router();
+const {register,authorize_admin,view_all,unauthorize_admin,delete_any_admin,view_by_admin_id,check_email,view_by_name, view_by_email} = require('../../controller/admin');
+const {REGISTER,AUTHORIZE_ADMIN,VIEW_ALL,UNAUTHORIZE_ADMIN,DELETE_ANY_ADMIN,VIEW_BY_ADMIN_ID,CHECK_EMAIL,VIEW_BY_NAME,VIEW_BY_EMAIL} = require('../../utils/config').ROUTES.ADMIN;
+const {DELETE_ANY_USER} = require('../../utils/config').ROUTES.USER;
+const {delete_any_user} = require('../../controller/user');
+router.post(REGISTER,register);
+router.post(CHECK_EMAIL,check_email);
+router.post(AUTHORIZE_ADMIN,authorize_admin);
+router.get(VIEW_ALL,view_all);
+router.post(VIEW_BY_NAME,view_by_name);
+router.post(VIEW_BY_EMAIL,view_by_email);
+router.post(VIEW_BY_ADMIN_ID,view_by_admin_id);
+router.post(UNAUTHORIZE_ADMIN,unauthorize_admin);
+router.post(DELETE_ANY_ADMIN,delete_any_admin);
+router.post(DELETE_ANY_USER,delete_any_user);
+module.exports = router;
