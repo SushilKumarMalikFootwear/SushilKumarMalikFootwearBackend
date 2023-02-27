@@ -8,7 +8,8 @@ module.exports = {
         DELETED_USERS:"deleted_users",
         DELETED_ADMIN:"deleted_admin",
         EMAIL:"email",
-        NEWS_LETTER:"news_letter"
+        NEWS_LETTER:"news_letter",
+        CONFIG_LISTS:'config_lists'
     },
     STATUS_CODES:{
         SUCCESS:200,
@@ -21,6 +22,7 @@ module.exports = {
         MY_API:'/my_api',
         DIRECT_CHANGE:'/direct_change',
         ROOT:'/',
+        GET_CONFIF_LISTS:'/get_config_lists',
         PAYMENTS:{
             PAY:'/pay'
         },

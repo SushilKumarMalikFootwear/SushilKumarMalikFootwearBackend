@@ -7,6 +7,7 @@ const orderOperations = require('../db/services/orders_crud')
 const productController = {
     add(request,response){
             let footwearObject = request.body;
+            footwearObject.footwear_id = uniqid(footwearObject.category)
             let promise = productOperations.add_product(footwearObject);
             promise.then((doc)=>{
                 response.status(SUCCESS).json({message:messageBundle['product.added'],doc:doc});

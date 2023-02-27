@@ -13,6 +13,7 @@ app.use(cors()); //using cors
 
 //ROUTES AVAILABLE BEFORE ANY LOGIN     (basically these routes dont require token in headers/authorization)
 app.use(ROOT, require("./api/routes/my_apis"));
+app.use(ROOT, require("./api/routes/config_lists"));
 app.use(ROOT, require("./api/routes/user_login_register")); //user - login,register,forgot pass, acc recover
 app.use(ROOT, require("./api/routes/admin_login")); //admin - login,forgot pass,acc recover (admin can only be registered by any other authorized admin)
 app.use(ROOT, require("./api/routes/activate_acc_user")); //activate account after regiseration
