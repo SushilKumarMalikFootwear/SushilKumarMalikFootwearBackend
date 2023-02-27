@@ -2,22 +2,24 @@ const FootwearModel = require("../models/footwear");
 var ObjectId = require("mongoose").Types.ObjectId;
 module.exports = {
   add_product(footwearObject) {
-    let start_size = footwearObject.size_range.split(" ")[0].split("X")[0];
-    let end_size = footwearObject.size_range.split(" ")[0].split("X")[1];
+    let start_size = parseInt(footwearObject.size_range.split(" ")[0].split("X")[0]);
+    let end_size = parseInt(footwearObject.size_range.split(" ")[0].split("X")[1]);
     let pair = footwearObject.pairs_in_stock[0];
     for (let i = start_size; i <= end_size; i++) {
-      if (pair.size != i || pair.available_at != "HOME")
+      if (pair.size != i || pair.available_at != "HOME") {
         footwearObject.pairs_in_stock.push({
           size: i,
           available_at: "HOME",
           quantity: 0,
         });
-      if (pair.size != i || pair.available_at != "SHOP")
+      }
+      if (pair.size != i || pair.available_at != "SHOP") {
         footwearObject.pairs_in_stock.push({
           size: i,
           available_at: "SHOP",
           quantity: 0,
         });
+      }
     }
     let promise = FootwearModel.create(footwearObject);
     return promise;
@@ -568,21 +570,21 @@ module.exports = {
       // });
       // console.log(pair_present);
       let update = await FootwearModel.updateOne(
-            {
-              _id: footwear_id,
-              pairs_in_stock: {
-                $elemMatch: {
-                  size: pair.size,
-                  available_at: pair.available_at,
-                },
-              },
+        {
+          _id: footwear_id,
+          pairs_in_stock: {
+            $elemMatch: {
+              size: pair.size,
+              available_at: pair.available_at,
             },
-            {
-              $inc: {
-                "pairs_in_stock.$.quantity": pair.quantity,
-              },
-            }
-          );
+          },
+        },
+        {
+          $inc: {
+            "pairs_in_stock.$.quantity": pair.quantity,
+          },
+        }
+      );
       return update;
     } catch (err) {
       console.log("ERROR is : ", err);
