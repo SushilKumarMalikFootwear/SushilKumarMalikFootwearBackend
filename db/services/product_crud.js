@@ -2,8 +2,8 @@ const FootwearModel = require("../models/footwear");
 var ObjectId = require("mongoose").Types.ObjectId;
 module.exports = {
   add_product(footwearObject) {
-    let start_size = footwearObject.size_range.split("X")[0];
-    let end_size = footwearObject.size_range.split("X")[1];
+    let start_size = footwearObject.size_range.split(" ")[0].split("X")[0];
+    let end_size = footwearObject.size_range.split(" ")[0].split("X")[1];
     let pair = footwearObject.pairs_in_stock[0];
     for (let i = start_size; i <= end_size; i++) {
       if (pair.size != i || pair.available_at != "HOME")
