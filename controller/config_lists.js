@@ -4,7 +4,7 @@ const ConfigListsOperations = require("../db/services/config_lists");
 const configListsController = {
     async getConfigLists(request,response){
         let configLists = await ConfigListsOperations.getConfigLists();
-        if(configLists){console.log(configLists)
+        if(configLists){
             response.status(SUCCESS).json(configLists);           
         }
         else{
