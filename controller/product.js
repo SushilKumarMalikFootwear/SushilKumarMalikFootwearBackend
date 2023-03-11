@@ -7,7 +7,7 @@ const orderOperations = require('../db/services/orders_crud')
 const productController = {
     add(request,response){
             let footwearObject = request.body;
-            footwearObject.footwear_id = uniqid(footwearObject.category)
+            footwearObject.footwear_id = uniqid(footwearObject.category.split(' ').join('_'))
             let promise = productOperations.add_product(footwearObject);
             promise.then((doc)=>{
                 response.status(SUCCESS).json({message:messageBundle['product.added'],doc:doc});
@@ -399,26 +399,28 @@ const productController = {
     },
     async update_product(request,response){
         try{
-            if(request.body.p_price>=0){
-                let product_id=request.body.product_id;
-                let productObject={
-                    product_name:request.body.p_name,
-                    product_category:request.body.p_category,
-                    product_price:request.body.p_price,
-                    product_img:request.body.p_img,
-                    product_desc:request.body.p_desc
+                let footwear_id=request.body.footwear_id;
+                let footwearObject={
+                    brand:request.body.brand,
+                    sub_brand:request.body.sub_brand,
+                    article:request.body.article,
+                    mrp:request.body.mrp,
+                    selling_price:request.body.selling_price,
+                    cost_price:request.body.cost_price,
+                    category:request.body.category,
+                    color:request.body.color,
+                    pairs_in_stock:request.body.pairs_in_stock,
+                    size_range:request.body.size_range,
+                    description:request.body.description,
+                    images:request.body.images
                 };
-                let product = await productOperations.update_product(product_id,productObject);
-                if(product.modifiedCount && productObject){
-                    response.status(SUCCESS).json({message:messageBundle["update.successful"],Product:productObject});
+                let product = await productOperations.update_product(footwear_id,footwearObject);
+                if(product.modifiedCount && footwearObject){
+                    response.status(SUCCESS).json({message:messageBundle["update.successful"],Product:footwearObject});
                 }
                 else{
                     response.status(NOT_FOUND).json({message:messageBundle["update.unsuccessful"]});
                 }
-            }
-            else{
-                response.status(NOT_FOUND).json({message:messageBundle["product.qty_or_price"]});
-            }
         }
         catch(err){
             response.status(SERVER_CRASH).json({message:messageBundle['unsuccessful'],ERROR:err});

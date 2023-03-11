@@ -511,20 +511,26 @@ module.exports = {
       console.log("ERROR is : ", err);
     }
   },
-  async update_product(product_id, product) {
+  async update_product(footwear_id, footwearObject) {
     try {
       let update = await FootwearModel.updateOne(
         {
-          product_id: product_id,
+          footwear_id: footwear_id,
         },
         {
           $set: {
-            product_name: product.product_name,
-            product_category: product.product_category,
-            product_price: product.product_price,
-            product_img: product.product_img,
-            product_desc: product.product_desc,
-            discount: product.discount,
+            brand:footwearObject.brand,
+            sub_brand:footwearObject.sub_brand,
+            article:footwearObject.article,
+            mrp:footwearObject.mrp,
+            selling_price:footwearObject.selling_price,
+            cost_price:footwearObject.cost_price,
+            category:footwearObject.category,
+            color:footwearObject.color,
+            pairs_in_stock:footwearObject.pairs_in_stock,
+            size_range:footwearObject.size_range,
+            description:footwearObject.description,
+            images:footwearObject.images
           },
         }
       );
