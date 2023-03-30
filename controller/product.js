@@ -39,6 +39,21 @@ const productController = {
             response.status(SERVER_CRASH).json({message:messageBundle['unsuccessful'],ERROR:err});
         }
     },
+    async filter_footwears(request,response){
+        try{
+            let filter = request.body;
+            let footwears = await productOperations.filter_footwears(filter);
+            if(footwears){
+                response.status(SUCCESS).json({message:messageBundle["product.found"],footwears:footwears});
+            }
+            else{
+                response.status(NOT_FOUND).json({message:messageBundle["product.notfound"]});
+            }
+        }
+        catch(err){
+            response.status(SERVER_CRASH).json({message:messageBundle['unsuccessful'],ERROR:err});
+        }
+    },
     async view_45_products(request,response){
         try{
             let skip = request.query.skip;
@@ -445,9 +460,9 @@ const productController = {
     },
     async delete_product(request,response){
         try{
-            let product_id = request.body.product_id;
-            let product = await productOperations.delete_product(product_id);
-            if(product.deletedCount && product_id){
+            let footwear_id = request.query.footwear_id;
+            let product = await productOperations.delete_product(footwear_id);
+            if(product.deletedCount && footwear_id){
                 response.status(SUCCESS).json({message:messageBundle["delete.successful"]});
             }
             else{

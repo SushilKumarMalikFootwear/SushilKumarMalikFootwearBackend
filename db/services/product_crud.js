@@ -26,7 +26,7 @@ module.exports = {
   },
   view_all_products() {
     try {
-      let footwears = FootwearModel.find();
+      let footwears = FootwearModel.find().sort({ _id: -1 });
       if (footwears.length != 0) {
         return footwears;
       } else {
@@ -34,6 +34,63 @@ module.exports = {
       }
     } catch (err) {
       console.log("ERROR is : ", err);
+      return null;
+    }
+  },
+  async filter_footwears(filterObject) {
+    try {
+      let filterAggregatePipeline = [];
+      let filter_by_brand = (brand) => {
+        return {
+          $match: { brand: { $regex: brand, $options: "i" } },
+        };
+      };
+      let filter_by_category = (category) => {
+        return {
+          $match: { category: { $regex: category, $options: "i" } },
+        };
+      };
+      let filter_by_article = (article) => {
+        return {
+          $match: { article: { $regex: article, $options: "i" } },
+        };
+      };
+      let filter_by_size_range = (size_range) => {
+        return {
+          $match: { size_range: { $regex: size_range, $options: "i" } },
+        };
+      };
+      let filter_by_color = (color) => {
+        return {
+          $match: { color: { $regex: color, $options: "i" } },
+        };
+      };
+      for (key in filterObject) {
+        if (filterObject[key] != "") {
+          if (key == "brand") {
+            filterAggregatePipeline.push(filter_by_brand(filterObject[key]));
+          } else if (key == "category") {
+            filterAggregatePipeline.push(filter_by_category(filterObject[key]));
+          } else if (key == "article") {
+            filterAggregatePipeline.push(filter_by_article(filterObject[key]));
+          } else if (key == "size_range") {
+            filterAggregatePipeline.push(
+              filter_by_size_range(filterObject[key])
+            );
+          } else if (key == "color") {
+            filterAggregatePipeline.push(filter_by_color(filterObject[key]));
+          }
+        }
+      }
+      let footwears = await FootwearModel.aggregate(filterAggregatePipeline);
+      if (footwears.length != 0) {
+        return footwears;
+      } else {
+        return [];
+      }
+    } catch (err) {
+      console.log("ERROR is : ", err);
+      return null;
     }
   },
   async view_45_products(skip, limit, rating) {
@@ -519,18 +576,18 @@ module.exports = {
         },
         {
           $set: {
-            brand:footwearObject.brand,
-            sub_brand:footwearObject.sub_brand,
-            article:footwearObject.article,
-            mrp:footwearObject.mrp,
-            selling_price:footwearObject.selling_price,
-            cost_price:footwearObject.cost_price,
-            category:footwearObject.category,
-            color:footwearObject.color,
-            pairs_in_stock:footwearObject.pairs_in_stock,
-            size_range:footwearObject.size_range,
-            description:footwearObject.description,
-            images:footwearObject.images
+            brand: footwearObject.brand,
+            sub_brand: footwearObject.sub_brand,
+            article: footwearObject.article,
+            mrp: footwearObject.mrp,
+            selling_price: footwearObject.selling_price,
+            cost_price: footwearObject.cost_price,
+            category: footwearObject.category,
+            color: footwearObject.color,
+            pairs_in_stock: footwearObject.pairs_in_stock,
+            size_range: footwearObject.size_range,
+            description: footwearObject.description,
+            images: footwearObject.images,
           },
         }
       );
@@ -599,7 +656,7 @@ module.exports = {
   async delete_product(p_id) {
     try {
       let deleted = await FootwearModel.deleteOne({
-        product_id: p_id,
+        footwear_id: p_id,
       });
       return deleted;
     } catch (err) {

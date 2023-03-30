@@ -5,5 +5,5 @@ const {ADD_FOOTWEAR,UPDATE_PRODUCT,DELETE_PRODUCT,UPDATE_QUANTITY} = require('..
 router.post(ADD_FOOTWEAR,add);
 router.post(UPDATE_PRODUCT,update_product);
 router.post(UPDATE_QUANTITY,update_quantity)
-router.post(DELETE_PRODUCT,delete_product);
+router.get(DELETE_PRODUCT,delete_product);
 module.exports = router;

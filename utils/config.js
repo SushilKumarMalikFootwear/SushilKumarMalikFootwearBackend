@@ -102,6 +102,7 @@ module.exports = {
         PRODUCT:{
             ADD_FOOTWEAR:'/add_footwear',
             VIEW_ALL_FOOTWEARS:'/view_all_footwears',
+            FILTER_FOOTWEARS:'/filter_footwears',
             VIEW_45_PRODUCTS:'/view_45_products',
             VIEW_BY_interest:'/view_by_interest',
             VIEW_BY_NAME:'/view_by_name',
