@@ -82,7 +82,10 @@ module.exports = {
           }
         }
       }
-      let footwears = await FootwearModel.aggregate(filterAggregatePipeline);
+      let footwears =
+        filterAggregatePipeline.length == 0
+          ? await FootwearModel.find().sort({ _id: -1 })
+          : await FootwearModel.aggregate(filterAggregatePipeline);
       if (footwears.length != 0) {
         return footwears;
       } else {
