@@ -7,16 +7,16 @@ const {VIEW_ALL_FOOTWEARS,VIEW_BY_NAME,FILTER_FOOTWEARS,VIEW_BY_CATEGORY,VIEW_BY
     VIEW_BY_PRICE_CATEGORIES,VIEW_45_PRODUCTS} = require('../../utils/config').ROUTES.PRODUCT;
 router.post(FILTER_FOOTWEARS,filter_footwears)
 router.get(VIEW_ALL_FOOTWEARS,view_all_products);
-router.get(VIEW_45_PRODUCTS,view_45_products);
-router.get(VIEW_BY_NAME,view_by_name);
-router.get(VIEW_BY_CATEGORY,view_by_category);
-router.post(VIEW_BY_CATEGORIES,view_by_categories);
+// router.get(VIEW_45_PRODUCTS,view_45_products);
+// router.get(VIEW_BY_NAME,view_by_name);
+// router.get(VIEW_BY_CATEGORY,view_by_category);
+// router.post(VIEW_BY_CATEGORIES,view_by_categories);
 router.get(VIEW_BY_FOOTWEAR_ID,view_by_product_id);
-router.get(VIEW_BY_PRICE,view_by_price);
-router.get(VIEW_BY_RATING,view_by_rating);
-router.get(VIEW_BY_NAME_CATEGORY,view_by_name_category);
-router.post(VIEW_BY_NAME_CATEGORIES,view_by_name_categories);
-router.post(VIEW_BY_PRICE_CATEGORIES,view_by_price_categories);
-router.post(VIEW_ALL_REVIEWS,view_all_reviews);
-router.post(SEARCH_IN_REVIEWS,search_in_reviews);
+// router.get(VIEW_BY_PRICE,view_by_price);
+// router.get(VIEW_BY_RATING,view_by_rating);
+// router.get(VIEW_BY_NAME_CATEGORY,view_by_name_category);
+// router.post(VIEW_BY_NAME_CATEGORIES,view_by_name_categories);
+// router.post(VIEW_BY_PRICE_CATEGORIES,view_by_price_categories);
+// router.post(VIEW_ALL_REVIEWS,view_all_reviews);
+// router.post(SEARCH_IN_REVIEWS,search_in_reviews);
 module.exports = router;

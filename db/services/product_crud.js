@@ -24,7 +24,7 @@ module.exports = {
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
-  view_all_products() {
+  async view_all_products() {
     try {
       let footwears = FootwearModel.find().sort({ _id: -1 });
       if (footwears.length != 0) {
@@ -36,6 +36,47 @@ module.exports = {
       console.log("ERROR is : ", err);
       return null;
     }
+    // let footwears = await FootwearModel.aggregate([
+    //   {
+    //     $match: {
+    //       article: "GOLA",
+    //       color: "WHITE",
+    //     },
+    //   },
+    // ]);
+    // let allSize = {};
+    // let allSizeHome = {};
+    // let allSizeShop = {};
+    // let extraSize = {};
+    // footwears.forEach((footwear) => {
+    //   footwear.pairs_in_stock.forEach((pair) => {
+    //     if (footwear.size_range == "5X10 small") {
+    //       allSize[pair.size + "s"] = allSize[pair.size + "s"]
+    //         ? pair.quantity + allSize[pair.size + "s"]
+    //         : pair.quantity;
+    //       if (pair.available_at == "HOME") {
+    //         allSizeHome[pair.size + "s"] = pair.quantity;
+    //       } else {
+    //         allSizeShop[pair.size + "s"] = pair.quantity;
+    //       }
+    //     } else {
+    //       allSize[pair.size] = allSize[pair.size]
+    //         ? pair.quantity + allSize[pair.size]
+    //         : pair.quantity;
+    //       if (pair.available_at == "HOME") {
+    //         allSizeHome[pair.size] = pair.quantity;
+    //       } else {
+    //         allSizeShop[pair.size] = pair.quantity;
+    //       }
+    //     }
+    //   });
+    // });
+    // for(key in allSize){
+    //   if(allSize[key]>4){
+    //     extraSize[key]=allSize[key];
+    //   }
+    // }
+    // return { extraSize };
   },
   async filter_footwears(filterObject) {
     try {
