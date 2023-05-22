@@ -7,7 +7,7 @@ const jwt = require("../utils/token");
 const orderOperations = require("../db/services/orders_crud");
 const productController = {
   add(request, response) {
-    console, log(request.body);
+    console.log(request.body);
     // let footwearObject = request.body;
     // footwearObject.footwear_id = uniqid(footwearObject.category.split(' ').join('_'))
     // let promise = productOperations.add_product(footwearObject);
