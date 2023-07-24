@@ -6,14 +6,16 @@ const jwt = require('../utils/token');
 const orderOperations = require('../db/services/orders_crud')
 const productController = {
     add(request,response){
-            let footwearObject = request.body;
-            footwearObject.footwear_id = uniqid(footwearObject.category.split(' ').join('_'))
-            let promise = productOperations.add_product(footwearObject);
-            promise.then((doc)=>{
-                response.status(SUCCESS).json({message:messageBundle['product.added'],doc:doc});
-            }).catch((err)=>{
-                response.status(SERVER_CRASH).json({message:messageBundle['product.failed'],ERROR:err})
-            });
+            // let footwearObject = request.body;
+            // footwearObject.footwear_id = uniqid(footwearObject.category.split(' ').join('_'))
+            // let promise = productOperations.add_product(footwearObject);
+            // promise.then((doc)=>{
+            //     response.status(SUCCESS).json({message:messageBundle['product.added'],doc:doc});
+            // }).catch((err)=>{
+            //     response.status(SERVER_CRASH).json({message:messageBundle['product.failed'],ERROR:err})
+            // });
+            console.log(request.body);
+            response.status(SUCCESS).json({message:messageBundle['product.added']});
     },
     async view_all_products(request,response){
         // if(request.query.rating){
