@@ -106,6 +106,11 @@ module.exports = {
           $match: { color: { $regex: color, $options: "i" } },
         };
       };
+      let filter_by_vendor = (color) => {
+        return {
+          $match: { vendor: { $regex: vendor, $options: "i" } },
+        };
+      };
       for (key in filterObject) {
         if (filterObject[key] != "") {
           if (key == "brand") {
@@ -120,6 +125,8 @@ module.exports = {
             );
           } else if (key == "color") {
             filterAggregatePipeline.push(filter_by_color(filterObject[key]));
+          } else if (key == "vendor") {
+            filterAggregatePipeline.push(filter_by_vendor(filterObject[key]));
           }
         }
       }
@@ -632,6 +639,7 @@ module.exports = {
             size_range: footwearObject.size_range,
             description: footwearObject.description,
             images: footwearObject.images,
+            vendor:footwearObject.vendor
           },
         }
       );

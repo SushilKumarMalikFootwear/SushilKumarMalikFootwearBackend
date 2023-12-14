@@ -20,6 +20,7 @@ const footwearSchema = new Schema(
     pairs_in_stock: {type:[footwear_pair_schema]},
     size_range: { type: SchemaTypes.String },
     description:{type:SchemaTypes.String},
+    vendor: { type: SchemaTypes.String },
     images:{type:SchemaTypes.Array}
   },
   {

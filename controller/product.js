@@ -429,7 +429,8 @@ const productController = {
                     pairs_in_stock:request.body.pairs_in_stock,
                     size_range:request.body.size_range,
                     description:request.body.description,
-                    images:request.body.images
+                    images:request.body.images,
+                    vendor:request.body.vendor
                 };
                 let product = await productOperations.update_product(footwear_id,footwearObject);
                 if(product.modifiedCount && footwearObject){
