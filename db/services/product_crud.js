@@ -26,7 +26,7 @@ module.exports = {
   },
   async view_all_products() {
     try {
-      let footwears = FootwearModel.find().sort({ _id: -1 });
+      let footwears = await FootwearModel.find().sort({ _id: -1 });
       if (footwears.length != 0) {
         return footwears;
       } else {
@@ -639,7 +639,7 @@ module.exports = {
             size_range: footwearObject.size_range,
             description: footwearObject.description,
             images: footwearObject.images,
-            vendor:footwearObject.vendor
+            vendor: footwearObject.vendor,
           },
         }
       );
