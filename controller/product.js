@@ -8,28 +8,18 @@ const productController = {
     add(request,response){
             let footwearObject = request.body;
             footwearObject.footwear_id = uniqid(footwearObject.category.split(' ').join('_'))
+            footwearObject.out_of_stock = false;
             let promise = productOperations.add_product(footwearObject);
             promise.then((doc)=>{
                 response.status(SUCCESS).json({message:messageBundle['product.added'],doc:doc});
             }).catch((err)=>{
                 response.status(SERVER_CRASH).json({message:messageBundle['product.failed'],ERROR:err})
             });
-            // console.log(request.body);
-            // response.status(SUCCESS).json({message:messageBundle['product.added']});
     },
     async view_all_products(request,response){
-        // if(request.query.rating){
-        //     rating = request.query.rating;
-        // }
-        // else {rating = 0;}
-        // let promise = productOperations.view_all_products(rating);
-        // promise.then((products)=>{
-        //     response.status(SUCCESS).json({message:messageBundle["product.found"],AllProducts:products});
-        // }).catch((err)=>{
-        //     response.status(NOT_FOUND).json({message:messageBundle["product.notfound"]});
-        // });
         try{
-            let footwears = await productOperations.view_all_products();
+            let out_of_stock = request.query.out_of_stock;
+            let footwears = await productOperations.view_all_products(out_of_stock);
             if(footwears){
                 response.status(SUCCESS).json({message:messageBundle["product.found"],footwears:footwears});
             }
@@ -43,8 +33,9 @@ const productController = {
     },
     async filter_footwears(request,response){
         try{
+            let out_of_stock = request.query.out_of_stock;
             let filter = request.body;
-            let footwears = await productOperations.filter_footwears(filter);
+            let footwears = await productOperations.filter_footwears(filter,out_of_stock);
             if(footwears){
                 response.status(SUCCESS).json({message:messageBundle["product.found"],footwears:footwears});
             }

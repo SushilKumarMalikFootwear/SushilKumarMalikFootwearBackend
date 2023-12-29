@@ -2,31 +2,14 @@ const FootwearModel = require("../models/footwear");
 var ObjectId = require("mongoose").Types.ObjectId;
 module.exports = {
   add_product(footwearObject) {
-    // let start_size = parseInt(footwearObject.size_range.split(" ")[0].split("X")[0]);
-    // let end_size = parseInt(footwearObject.size_range.split(" ")[0].split("X")[1]);
-    // let pair = footwearObject.pairs_in_stock[0];
-    // for (let i = start_size; i <= end_size; i++) {
-    //   if (pair.size != i || pair.available_at != "HOME") {
-    //     footwearObject.pairs_in_stock.push({
-    //       size: i,
-    //       available_at: "HOME",
-    //       quantity: 0,
-    //     });
-    //   }
-    //   if (pair.size != i || pair.available_at != "SHOP") {
-    //     footwearObject.pairs_in_stock.push({
-    //       size: i,
-    //       available_at: "SHOP",
-    //       quantity: 0,
-    //     });
-    //   }
-    // }
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
-  async view_all_products() {
+  async view_all_products(out_of_stock) {
     try {
-      let footwears = await FootwearModel.find().sort({ _id: -1 });
+      let footwears = await FootwearModel.find({
+        out_of_stock: out_of_stock,
+      }).sort({ _id: -1 });
       if (footwears.length != 0) {
         return footwears;
       } else {
@@ -36,49 +19,8 @@ module.exports = {
       console.log("ERROR is : ", err);
       return null;
     }
-    // let footwears = await FootwearModel.aggregate([
-    //   {
-    //     $match: {
-    //       article: "GOLA",
-    //       color: "WHITE",
-    //     },
-    //   },
-    // ]);
-    // let allSize = {};
-    // let allSizeHome = {};
-    // let allSizeShop = {};
-    // let extraSize = {};
-    // footwears.forEach((footwear) => {
-    //   footwear.pairs_in_stock.forEach((pair) => {
-    //     if (footwear.size_range == "5X10 small") {
-    //       allSize[pair.size + "s"] = allSize[pair.size + "s"]
-    //         ? pair.quantity + allSize[pair.size + "s"]
-    //         : pair.quantity;
-    //       if (pair.available_at == "HOME") {
-    //         allSizeHome[pair.size + "s"] = pair.quantity;
-    //       } else {
-    //         allSizeShop[pair.size + "s"] = pair.quantity;
-    //       }
-    //     } else {
-    //       allSize[pair.size] = allSize[pair.size]
-    //         ? pair.quantity + allSize[pair.size]
-    //         : pair.quantity;
-    //       if (pair.available_at == "HOME") {
-    //         allSizeHome[pair.size] = pair.quantity;
-    //       } else {
-    //         allSizeShop[pair.size] = pair.quantity;
-    //       }
-    //     }
-    //   });
-    // });
-    // for(key in allSize){
-    //   if(allSize[key]>4){
-    //     extraSize[key]=allSize[key];
-    //   }
-    // }
-    // return { extraSize };
   },
-  async filter_footwears(filterObject) {
+  async filter_footwears(filterObject, out_of_stock) {
     try {
       let filterAggregatePipeline = [];
       let filter_by_brand = (brand) => {
@@ -106,7 +48,7 @@ module.exports = {
           $match: { color: { $regex: color, $options: "i" } },
         };
       };
-      let filter_by_vendor = (color) => {
+      let filter_by_vendor = (vendor) => {
         return {
           $match: { vendor: { $regex: vendor, $options: "i" } },
         };
@@ -130,6 +72,9 @@ module.exports = {
           }
         }
       }
+      filterAggregatePipeline.push({
+        $match: { out_of_stock: out_of_stock=='true' },
+      });
       let footwears =
         filterAggregatePipeline.length == 0
           ? await FootwearModel.find().sort({ _id: -1 })
@@ -621,6 +566,15 @@ module.exports = {
   },
   async update_product(footwear_id, footwearObject) {
     try {
+      let out_of_stock = true;
+      for (let pair in footwearObject.pairs_in_stock) {
+        if (pair.quantity > 0) {
+          out_of_stock = false;
+        }
+      }
+      if (footwearObject.description) {
+        out_of_stock = false;
+      }
       let update = await FootwearModel.updateOne(
         {
           footwear_id: footwear_id,
@@ -640,6 +594,7 @@ module.exports = {
             description: footwearObject.description,
             images: footwearObject.images,
             vendor: footwearObject.vendor,
+            out_of_stock: out_of_stock,
           },
         }
       );

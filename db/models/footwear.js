@@ -8,6 +8,7 @@ const footwear_pair_schema = new Schema({
 });
 const footwearSchema = new Schema(
   {
+    out_of_stock: {type: SchemaTypes.Boolean},
     footwear_id: { type: SchemaTypes.String },
     brand: { type: SchemaTypes.String },
     sub_brand: { type: SchemaTypes.String },
