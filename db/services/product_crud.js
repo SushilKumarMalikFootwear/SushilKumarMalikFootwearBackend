@@ -73,7 +73,7 @@ module.exports = {
         }
       }
       filterAggregatePipeline.push({
-        $match: { out_of_stock: out_of_stock=='true' },
+        $match: { out_of_stock: out_of_stock == "true" },
       });
       let footwears =
         filterAggregatePipeline.length == 0

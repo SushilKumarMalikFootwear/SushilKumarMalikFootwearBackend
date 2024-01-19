@@ -407,25 +407,9 @@ const productController = {
     },
     async update_product(request,response){
         try{
-                let footwear_id=request.body.footwear_id;
-                let footwearObject={
-                    brand:request.body.brand,
-                    sub_brand:request.body.sub_brand,
-                    article:request.body.article,
-                    mrp:request.body.mrp,
-                    selling_price:request.body.selling_price,
-                    cost_price:request.body.cost_price,
-                    category:request.body.category,
-                    color:request.body.color,
-                    pairs_in_stock:request.body.pairs_in_stock,
-                    size_range:request.body.size_range,
-                    description:request.body.description,
-                    images:request.body.images,
-                    vendor:request.body.vendor
-                };
-                let product = await productOperations.update_product(footwear_id,footwearObject);
-                if(product.modifiedCount && footwearObject){
-                    response.status(SUCCESS).json({message:messageBundle["update.successful"],Product:footwearObject});
+                let product = await productOperations.update_product(footwear_id,request.body);
+                if(product.modifiedCount){
+                    response.status(SUCCESS).json({message:messageBundle["update.successful"]});
                 }
                 else{
                     response.status(NOT_FOUND).json({message:messageBundle["update.unsuccessful"]});
