@@ -407,7 +407,7 @@ const productController = {
     },
     async update_product(request,response){
         try{
-                let product = await productOperations.update_product(footwear_id,request.body);
+                let product = await productOperations.update_product(request.body.footwear_id,request.body);
                 if(product.modifiedCount){
                     response.status(SUCCESS).json({message:messageBundle["update.successful"]});
                 }
