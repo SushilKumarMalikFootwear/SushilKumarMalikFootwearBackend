@@ -577,7 +577,6 @@ module.exports = {
       if (footwearObject.description) {
         out_of_stock = false;
       }
-      console.log('out of stock : ',out_of_stock);
       let update = await FootwearModel.updateOne(
         {
           footwear_id: footwear_id,
