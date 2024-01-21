@@ -569,7 +569,6 @@ module.exports = {
       let out_of_stock = true;
       let arr = [...footwearObject.pairs_in_stock];
       for (let i = 0; i< arr.length; i++) {
-        console.log(arr[i].quantity);
         if (arr[i].quantity > 0) {
           out_of_stock = false;
         }
