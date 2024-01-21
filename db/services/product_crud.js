@@ -567,14 +567,17 @@ module.exports = {
   async update_product(footwear_id, footwearObject) {
     try {
       let out_of_stock = true;
-      for (let pair in footwearObject.pairs_in_stock) {
-        if (pair.quantity > 0) {
+      let arr = [...footwearObject.pairs_in_stock];
+      for (let i = 0; i< arr.length; i++) {
+        console.log(arr[i].quantity);
+        if (arr[i].quantity > 0) {
           out_of_stock = false;
         }
       }
       if (footwearObject.description) {
         out_of_stock = false;
       }
+      console.log('out of stock : ',out_of_stock);
       let update = await FootwearModel.updateOne(
         {
           footwear_id: footwear_id,
