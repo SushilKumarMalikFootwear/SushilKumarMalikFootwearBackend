@@ -100,7 +100,8 @@ module.exports = {
             UPDATE_ORDER_STATUS:'/update_order_status'
         },
         PRODUCT:{
-            ADD_FOOTWEAR:'/add_footwear',
+            addFootwear:'/add_footwear',
+            applyChanges:'/applyChanges',
             VIEW_ALL_FOOTWEARS:'/view_all_footwears',
             FILTER_FOOTWEARS:'/filter_footwears',
             VIEW_45_PRODUCTS:'/view_45_products',

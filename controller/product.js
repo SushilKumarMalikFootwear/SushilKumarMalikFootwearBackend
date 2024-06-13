@@ -3,8 +3,6 @@ const { SUCCESS, SERVER_CRASH, NOT_FOUND } =
 const uniqid = require("uniqid");
 const messageBundle = require("../locales/en");
 const productOperations = require("../db/services/product_crud");
-const jwt = require("../utils/token");
-const orderOperations = require("../db/services/orders_crud");
 const productController = {
   add(request, response) {
     let footwearObject = request.body;
@@ -25,17 +23,19 @@ const productController = {
           .json({ message: messageBundle["product.failed"], ERROR: err });
       });
   },
+  async apply_changes(request, response) {
+    await productOperations.applyChanges();
+    response.status(SUCCESS).json({message : messageBundle['successful']});
+  },
   async view_all_products(request, response) {
     try {
       let out_of_stock = request.query.out_of_stock;
       let footwears = await productOperations.view_all_products(out_of_stock);
       if (footwears) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            footwears: footwears,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          footwears: footwears,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -56,12 +56,10 @@ const productController = {
         out_of_stock
       );
       if (footwears) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            footwears: footwears,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          footwears: footwears,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -88,13 +86,11 @@ const productController = {
         rating
       );
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            Products: products.products,
-            Total_products: products.total_products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          Products: products.products,
+          Total_products: products.total_products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -120,12 +116,10 @@ const productController = {
         rating
       );
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -147,12 +141,10 @@ const productController = {
       }
       let products = await productOperations.view_by_name(name, rating);
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -174,12 +166,10 @@ const productController = {
       }
       let products = await productOperations.view_by_category(category, rating);
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -204,12 +194,10 @@ const productController = {
         rating
       );
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -232,12 +220,10 @@ const productController = {
       }
       let products = await productOperations.view_by_price(gt, lt, rating);
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -254,12 +240,10 @@ const productController = {
       let rating = request.query.rating;
       let products = await productOperations.view_by_rating(rating);
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -284,12 +268,10 @@ const productController = {
         rating
       );
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -314,12 +296,10 @@ const productController = {
         rating
       );
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -342,12 +322,10 @@ const productController = {
         categories
       );
       if (products) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            AllProducts: products,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          AllProducts: products,
+        });
       } else {
         response
           .status(NOT_FOUND)
@@ -364,161 +342,14 @@ const productController = {
       let footwear_id = request.query.footwear_id;
       let footwear = await productOperations.view_by_product_id(footwear_id);
       if (footwear) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["product.found"],
-            footwear: footwear,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["product.found"],
+          footwear: footwear,
+        });
       } else {
         response
           .status(NOT_FOUND)
           .json({ message: messageBundle["product.notfound"] });
-      }
-    } catch (err) {
-      response
-        .status(SERVER_CRASH)
-        .json({ message: messageBundle["unsuccessful"], ERROR: err });
-    }
-  },
-  async rate_product(request, response) {
-    try {
-      let token = request.headers["authorization"];
-      let doc = jwt.getdoc(token);
-      let product_id = request.body.product_id;
-      let rating = request.body.rating;
-      let check = await orderOperations.check_order_status(
-        doc.user_id,
-        product_id
-      );
-      if (check) {
-        let check_rated = await orderOperations.check_rated(
-          doc.user_id,
-          product_id
-        );
-        if (check_rated) {
-          let product = await productOperations.view_by_product_id(product_id);
-          let rated_by = product.rated_by + 1;
-          let new_rating =
-            (product.product_rating * product.rated_by + rating) / rated_by;
-          let update = await productOperations.update_rating(
-            product_id,
-            new_rating,
-            rated_by
-          );
-          if (update.modifiedCount) {
-            orderOperations.product_rated(doc.user_id, product_id, rating);
-            response
-              .status(SUCCESS)
-              .json({ message: messageBundle["rating_or_review.successful"] });
-          } else {
-            response
-              .status(SERVER_CRASH)
-              .json({ message: messageBundle["unsuccessful"] });
-          }
-        } else {
-          response
-            .status(SERVER_CRASH)
-            .json({ message: messageBundle["product_already.rated"] });
-        }
-      } else {
-        response
-          .status(NOT_FOUND)
-          .json({ message: messageBundle["rating_or_review.unsuccessful"] });
-      }
-    } catch (err) {
-      response
-        .status(SERVER_CRASH)
-        .json({ message: messageBundle["unsuccessful"], ERROR: err });
-    }
-  },
-  async edit_rating(request, response) {
-    try {
-      let token = request.headers["authorization"];
-      let doc = jwt.getdoc(token);
-      let product_id = request.body.product_id;
-      let rating = request.body.rating;
-      let obj = await orderOperations.view_order_by_product_id(
-        doc.user_id,
-        product_id
-      );
-      let product = await productOperations.view_by_product_id(product_id);
-      if (obj) {
-        let product_rating = product.product_rating;
-        let old_rating = obj.product_rated;
-        let rated_by = product.rated_by;
-        let new_rating =
-          (product_rating * rated_by + rating - old_rating) / rated_by;
-        let change_rated = await orderOperations.product_rated(
-          doc.user_id,
-          product_id,
-          new_rating
-        );
-        let change = await productOperations.update_rating(
-          product_id,
-          new_rating,
-          rated_by
-        );
-        if (change.modifiedCount && change_rated.modifiedCount) {
-          response
-            .status(SUCCESS)
-            .json({ message: messageBundle["rating_or_review.successful"] });
-        } else {
-          response
-            .status(SERVER_CRASH)
-            .json({ message: messageBundle["unsuccessful"] });
-        }
-      } else {
-        response
-          .status(NOT_FOUND)
-          .json({ message: messageBundle["rating_or_review.unsuccessful"] });
-      }
-    } catch (err) {
-      response
-        .status(SERVER_CRASH)
-        .json({ message: messageBundle["unsuccessful"], ERROR: err });
-    }
-  },
-  async review_product(request, response) {
-    try {
-      let token = request.headers["authorization"];
-      let doc = jwt.getdoc(token);
-      let product_id = request.body.product_id;
-      let review = request.body.review;
-      let object = {
-        user_id: doc.user_id,
-        review: review,
-      };
-      let check = await orderOperations.check_order_status(
-        doc.user_id,
-        product_id
-      );
-      if (check) {
-        let check_reviewed = await productOperations.check_reviewed(
-          doc.user_id,
-          product_id
-        );
-        if (!check_reviewed) {
-          let update = await productOperations.add_review(product_id, object);
-          if (update.modifiedCount) {
-            console.log(update);
-            response
-              .status(SUCCESS)
-              .json({ message: messageBundle["rating_or_review.successful"] });
-          } else {
-            response
-              .status(SERVER_CRASH)
-              .json({ message: messageBundle["unsuccessful"] });
-          }
-        } else {
-          response
-            .status(SERVER_CRASH)
-            .json({ message: messageBundle["product_already.reviewed"] });
-        }
-      } else {
-        response
-          .status(NOT_FOUND)
-          .json({ message: messageBundle["rating_or_review.unsuccessful"] });
       }
     } catch (err) {
       response
@@ -628,12 +459,10 @@ const productController = {
         footwearObject
       );
       if (product.modifiedCount && footwearObject) {
-        response
-          .status(SUCCESS)
-          .json({
-            message: messageBundle["update.successful"],
-            Product: footwearObject,
-          });
+        response.status(SUCCESS).json({
+          message: messageBundle["update.successful"],
+          Product: footwearObject,
+        });
         if (product.modifiedCount) {
         } else {
           response

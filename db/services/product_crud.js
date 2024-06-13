@@ -5,6 +5,18 @@ module.exports = {
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
+  async applyChanges(){
+    let footwears = await FootwearModel.find();
+    for(let i = 0; i < footwears.length; i++){
+      let footwear = footwears[i];
+      for(let j = 0; j < footwear['pairs_in_stock'].length; j++){
+        let pair = footwear.pairs_in_stock[j]
+        if(pair.available_at=='home'||pair.available_at=='shop'){
+          console.log(pair.available_at);
+        }
+      }
+    }
+  },
   async view_all_products(out_of_stock) {
     try {
       let footwears = await FootwearModel.find({
