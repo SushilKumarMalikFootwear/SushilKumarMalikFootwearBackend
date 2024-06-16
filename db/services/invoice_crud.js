@@ -3,7 +3,7 @@ const productOperations = require("./product_crud");
 const traderFinancesOperation = require("./trader_finances");
 module.exports = {
   async save_invoice(invoice, isOldInvoice) {
-    invoice.invoice_no = await this.getNextInvoiceNumber(new Date());
+    invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
     let productId = invoice.product_id;
     let sold_at = invoice.sold_at;
     let size = invoice.size;
