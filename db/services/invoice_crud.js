@@ -41,4 +41,8 @@ module.exports = {
     const invoiceNumber = `${datePart}${countPart}`;
     return invoiceNumber;
   },
+  fetchInvoices(){
+    let promise = InvoiceModel.find();
+    return promise;
+  }
 };
