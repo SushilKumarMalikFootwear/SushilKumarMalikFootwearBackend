@@ -18,7 +18,8 @@ module.exports = {
         ROOT:'/',
         GET_CONFIF_LISTS:'/get_config_lists',
         INVOICE:{
-            saveInvoice:'/saveInvoice'
+            SAVE_INVOICE:'/saveInvoice',
+            FETCH_INVOICES:'/fetchInvoices'
         },
         PRODUCT:{
             addFootwear:'/add_footwear',
