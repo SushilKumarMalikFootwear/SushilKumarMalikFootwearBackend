@@ -1,5 +1,4 @@
 const FootwearModel = require("../models/footwear");
-var ObjectId = require("mongoose").Types.ObjectId;
 module.exports = {
   add_product(footwearObject) {
     let promise = FootwearModel.create(footwearObject);
@@ -391,6 +390,18 @@ module.exports = {
   async view_by_product_id(footwear_id) {
     try {
       let footwear = await FootwearModel.findById(footwear_id);
+      if (footwear) {
+        return footwear;
+      } else {
+        return null;
+      }
+    } catch (err) {
+      console.log("ERROR is : ", err);
+    }
+  },
+  async view_by_id(footwear_id) {
+    try {
+      let footwear = await FootwearModel.findOne({footwear_id:footwear_id});
       if (footwear) {
         return footwear;
       } else {

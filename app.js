@@ -14,6 +14,7 @@ app.use(cors()); //using cors
 //ROUTES AVAILABLE BEFORE ANY LOGIN     (basically these routes dont require token in headers/authorization)
 app.use(ROOT, require("./api/routes/config_lists"));
 app.use(ROOT, require("./api/routes/view_products")); 
+app.use(ROOT, require("./api/routes/invoice")); 
 app.use(ROOT, require("./api/routes/product_crud")); //add a product, update product details, delete a product.
 
 const server = app.listen(process.env.PORT || 1234, (err) => {
