@@ -16,7 +16,7 @@ module.exports = {
     }
     if (!isOldInvoice) {
       console.log("updating quantity")
-      await productOperations.update_product(productId, product);
+      await productOperations.update_product(product_id, product);
     }
     await traderFinancesOperation.updateFinancesByTraderName(
       product.vendor,
