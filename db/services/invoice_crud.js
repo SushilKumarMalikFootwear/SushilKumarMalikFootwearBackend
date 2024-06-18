@@ -11,7 +11,7 @@ module.exports = {
       let pair = product["pairs_in_stock"][i];
       if (pair.available_at == sold_at && pair.size == size) {
         pair.quantity--;
-        console.log("reducing quantity of "+invoice.article+invoice.color);
+        console.log("reducing quantity of "+invoice.article+" : "+invoice.color);
       }
     }
     if (!isOldInvoice) {
