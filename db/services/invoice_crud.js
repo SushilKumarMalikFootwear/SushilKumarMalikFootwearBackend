@@ -4,7 +4,7 @@ const traderFinancesOperation = require("./trader_finances");
 module.exports = {
   async save_invoice(invoice, isOldInvoice) {
     invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
-    let product = await productOperations.view_by_product_id(invoice.product_id)
+    let product = await productOperations.view_by_id(invoice.product_id)
     let sold_at = invoice.sold_at;
     let size = invoice.size;
     for (let i = 0; i < product["pairs_in_stock"].length; i++) {
