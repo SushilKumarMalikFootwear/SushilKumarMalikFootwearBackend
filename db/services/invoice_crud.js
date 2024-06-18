@@ -4,10 +4,12 @@ const traderFinancesOperation = require("./trader_finances");
 module.exports = {
   async save_invoice(invoice, isOldInvoice) {
     invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
-    let productId = invoice.product_id;
+    let product = await productOperations.filter_footwears(
+      { article: invoice.article, color: invoice.color }
+    )[0];
+    invoice.product_id = product.product_id;
     let sold_at = invoice.sold_at;
     let size = invoice.size;
-    let product = await productOperations.view_by_id(productId);
     for (let i = 0; i < product["pairs_in_stock"].length; i++) {
       let pair = product["pairs_in_stock"][i];
       if (pair.available_at == sold_at && pair.size == size) {
@@ -41,8 +43,8 @@ module.exports = {
     const invoiceNumber = `${datePart}${countPart}`;
     return invoiceNumber;
   },
-  fetchInvoices(){
+  fetchInvoices() {
     let promise = InvoiceModel.find();
     return promise;
-  }
+  },
 };

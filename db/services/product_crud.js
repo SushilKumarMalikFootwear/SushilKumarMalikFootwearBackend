@@ -4,13 +4,13 @@ module.exports = {
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
-  async applyChanges(){
+  async applyChanges() {
     let footwears = await FootwearModel.find();
-    for(let i = 0; i < footwears.length; i++){
+    for (let i = 0; i < footwears.length; i++) {
       let footwear = footwears[i];
-      for(let j = 0; j < footwear['pairs_in_stock'].length; j++){
-        let pair = footwear.pairs_in_stock[j]
-        if(pair.available_at=='home'||pair.available_at=='shop'){
+      for (let j = 0; j < footwear["pairs_in_stock"].length; j++) {
+        let pair = footwear.pairs_in_stock[j];
+        if (pair.available_at == "home" || pair.available_at == "shop") {
           console.log(pair.available_at);
         }
       }
@@ -83,9 +83,11 @@ module.exports = {
           }
         }
       }
-      filterAggregatePipeline.push({
-        $match: { out_of_stock: out_of_stock == "true" },
-      });
+      if (out_of_stock != null || out_of_stock != undefined) {
+        filterAggregatePipeline.push({
+          $match: { out_of_stock: out_of_stock == "true" },
+        });
+      }
       let footwears =
         filterAggregatePipeline.length == 0
           ? await FootwearModel.find().sort({ _id: -1 })
@@ -401,7 +403,7 @@ module.exports = {
   },
   async view_by_id(footwear_id) {
     try {
-      let footwear = await FootwearModel.findOne({footwear_id:footwear_id});
+      let footwear = await FootwearModel.findOne({ footwear_id: footwear_id });
       if (footwear) {
         return footwear;
       } else {
@@ -591,7 +593,7 @@ module.exports = {
     try {
       let out_of_stock = true;
       let arr = [...footwearObject.pairs_in_stock];
-      for (let i = 0; i< arr.length; i++) {
+      for (let i = 0; i < arr.length; i++) {
         if (arr[i].quantity > 0) {
           out_of_stock = false;
         }
