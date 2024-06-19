@@ -17,7 +17,7 @@ module.exports = {
           );
         }
       }
-      if (!isOldInvoice) {
+      if (isOldInvoice!="true") {
         console.log("updating quantity");
         await productOperations.update_product(invoice.product_id, product);
       }
