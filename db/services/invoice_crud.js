@@ -27,6 +27,11 @@ module.exports = {
         invoice.selling_price
       );
     } else {
+      await traderFinancesOperation.updateFinancesByTraderName2(
+        product.vendor,
+        invoice.cost_price,
+        invoice.selling_price
+      );
     }
     let promise = InvoiceModel.create(invoice);
     promise.then((val) => {
