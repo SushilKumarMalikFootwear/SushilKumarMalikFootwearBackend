@@ -8,7 +8,8 @@ const invoiceSchema = new Schema(
     invoice_date: { type: SchemaTypes.Date },
     product_id: { type: SchemaTypes.String },
     article: { type: SchemaTypes.String },
-    cost_price: { type: SchemaTypes.Number },
+    cost_price: { ,type: SchemaTypes.Number },
+    mrp: {type: SchemaTypes.Number}
     selling_price: { type: SchemaTypes.Number },
     profit: { type: SchemaTypes.Number },
     description: { type: SchemaTypes.String },
