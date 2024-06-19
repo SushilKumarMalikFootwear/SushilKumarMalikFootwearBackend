@@ -28,7 +28,7 @@ module.exports = {
       );
     } else {
       await traderFinancesOperation.updateFinancesByTraderName2(
-        product.vendor,
+        invoice.vendor,
         invoice.cost_price,
         invoice.selling_price
       );
