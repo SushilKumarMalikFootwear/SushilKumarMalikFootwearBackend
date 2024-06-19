@@ -4,29 +4,34 @@ const traderFinancesOperation = require("./trader_finances");
 module.exports = {
   async save_invoice(invoice, isOldInvoice) {
     invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
-    let product = await productOperations.view_by_id(invoice.product_id)
-    let sold_at = invoice.sold_at;
-    let size = invoice.size;
-    for (let i = 0; i < product["pairs_in_stock"].length; i++) {
-      let pair = product["pairs_in_stock"][i];
-      if (pair.available_at == sold_at && pair.size == size) {
-        pair.quantity--;
-        console.log("reducing quantity of "+invoice.article+" : "+invoice.color);
+    if (invoice.product_id) {
+      let product = await productOperations.view_by_id(invoice.product_id);
+      let sold_at = invoice.sold_at;
+      let size = invoice.size;
+      for (let i = 0; i < product["pairs_in_stock"].length; i++) {
+        let pair = product["pairs_in_stock"][i];
+        if (pair.available_at == sold_at && pair.size == size) {
+          pair.quantity--;
+          console.log(
+            "reducing quantity of " + invoice.article + " : " + invoice.color
+          );
+        }
       }
+      if (!isOldInvoice) {
+        console.log("updating quantity");
+        await productOperations.update_product(invoice.product_id, product);
+      }
+      await traderFinancesOperation.updateFinancesByTraderName(
+        product.vendor,
+        invoice.cost_price,
+        invoice.selling_price
+      );
+    } else {
     }
-    if (!isOldInvoice) {
-      console.log("updating quantity")
-      await productOperations.update_product(invoice.product_id, product);
-    }
-    await traderFinancesOperation.updateFinancesByTraderName(
-      product.vendor,
-      invoice.cost_price,
-      invoice.selling_price
-    );
     let promise = InvoiceModel.create(invoice);
-    promise.then((val)=>{
-      console.log("invoice created "+invoice.invoice_no);
-    })
+    promise.then((val) => {
+      console.log("invoice created " + invoice.invoice_no);
+    });
     return promise;
   },
   async getNextInvoiceNumber(date) {
