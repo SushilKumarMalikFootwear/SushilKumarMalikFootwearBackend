@@ -7,14 +7,15 @@ const invoiceSchema = new Schema(
     invoice_no: { type: SchemaTypes.String },
     invoice_date: { type: SchemaTypes.Date },
     product_id: { type: SchemaTypes.String },
+    vendor: { type: SchemaTypes.String },
     article: { type: SchemaTypes.String },
     cost_price: { type: SchemaTypes.Number },
-    mrp: {type: SchemaTypes.Number},
+    mrp: { type: SchemaTypes.Number },
     selling_price: { type: SchemaTypes.Number },
     profit: { type: SchemaTypes.Number },
     description: { type: SchemaTypes.String },
-    size : {type : SchemaTypes.Number},
-    color : {type: SchemaTypes.String },
+    size: { type: SchemaTypes.Number },
+    color: { type: SchemaTypes.String },
     sold_at: { type: SchemaTypes.String }, //HOME or SHOP
     payment_mode: { type: SchemaTypes.String }, // CASH/UPI
     payment_status: { type: SchemaTypes.String }, //PENDING/PAID
