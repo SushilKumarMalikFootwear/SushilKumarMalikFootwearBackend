@@ -1,18 +1,33 @@
 const FootwearModel = require("../models/footwear");
+const InvoiceModel = require("../models/invoice");
 module.exports = {
   add_product(footwearObject) {
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
   async applyChanges() {
-    let footwears = await FootwearModel.find();
+    const footwears = await FootwearModel.find();
+    let duplicates = {};
     for (let i = 0; i < footwears.length; i++) {
       let footwear = footwears[i];
-      for (let j = 0; j < footwear["pairs_in_stock"].length; j++) {
-        let pair = footwear.pairs_in_stock[j];
-        if (pair.available_at == "home" || pair.available_at == "shop") {
-          console.log(pair.available_at);
-        }
+      const key = `${footwear.article}_${footwear.color}`;
+      console.log(key)
+      if (!duplicates[key]) {
+        duplicates[key] = [];
+      }
+      duplicates[key].push(footwear);
+    }
+    for (const key in duplicates) {
+      const footwearGroup = duplicates[key];
+      if (footwearGroup.length > 1) {
+        footwearGroup.forEach(async (footwear) => {
+          const newArticle = `${footwear.article} ${footwear.size_range}`;
+          console.log(newArticle);
+          await FootwearModel.updateOne(
+            { _id: footwear._id },
+            { $set: { article: newArticle } }
+          );
+        });
       }
     }
   },
@@ -697,9 +712,7 @@ module.exports = {
     }
   },
   async direct_change() {
-    //will add or update discount randomly
     try {
-      console.log("reached");
       let err = 0;
       let products = await FootwearModel.find();
       for (let i = 0; i < products.length; i++) {
