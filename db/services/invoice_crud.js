@@ -60,4 +60,123 @@ module.exports = {
     let promise = InvoiceModel.find();
     return promise;
   },
+  async updateInvoice(invoice) {
+    let oldInvoice = await InvoiceModel.findOne({
+      invoice_no: invoice.invoice_no,
+    });
+    let product = await productOperations.view_by_id(invoice.product_id);
+    if (invoice.invoice_date != oldInvoice.invoice_date) {
+      invoice.invoice_no = getNextInvoiceNumber(invoice.invoice_date);
+    }
+    if (
+      (invoice.size != oldInvoice.size ||
+        invoice.sold_at != oldInvoice.sold_at) &&
+      invoice.product_id
+    ) {
+      for (let i = 0; i < product["pairs_in_stock"].length; i++) {
+        let pair = product["pairs_in_stock"][i];
+        if (
+          pair.available_at == oldInvoice.sold_at &&
+          pair.size == oldInvoice.size
+        ) {
+          pair.quantity++;
+          console.log(
+            "edit : increasing quantity of " +
+              oldInvoice.article +
+              " : " +
+              oldInvoice.color
+          );
+        }
+        if (pair.available_at == invoice.sold_at && pair.size == invoice.size) {
+          pair.quantity--;
+          console.log(
+            "edit : reducing quantity of " +
+              invoice.article +
+              " : " +
+              invoice.color
+          );
+        }
+      }
+      await productOperations.update_product(invoice.product_id, product);
+    }
+    if (
+      invoice.cost_price != oldInvoice.cost_price ||
+      invoice.selling_price != oldInvoice.selling_price
+    ) {
+      await traderFinancesOperation.updateFinancesByTraderName(
+        invoice.vendor,
+        invoice.cost_price - oldInvoice.cost_price,
+        invoice.selling_price - oldInvoice.selling_price
+      );
+    }
+    if (
+      invoice.invoice_status == "RETURNED" &&
+      oldInvoice.invoice_status == "COMPLETED"
+    ) {
+      await traderFinancesOperation.updateFinancesByTraderName(
+        invoice.vendor,
+        -invoice.cost_price,
+        -invoice.selling_price
+      );
+      for (let i = 0; i < product["pairs_in_stock"].length; i++) {
+        let pair = product["pairs_in_stock"][i];
+        if (pair.available_at == invoice.sold_at && pair.size == invoice.size) {
+          pair.quantity++;
+          console.log(
+            "return : increasing quantity of " +
+              invoice.article +
+              " : " +
+              invoice.color
+          );
+        }
+      }
+      await productOperations.update_product(invoice.product_id, product);
+    }
+    if (
+      invoice.invoice_status == "COMPLETED" &&
+      oldInvoice.invoice_status == "RETURNED"
+    ) {
+      await traderFinancesOperation.updateFinancesByTraderName(
+        invoice.vendor,
+        invoice.cost_price,
+        invoice.selling_price
+      );
+      for (let i = 0; i < product["pairs_in_stock"].length; i++) {
+        let pair = product["pairs_in_stock"][i];
+        if (pair.available_at == invoice.sold_at && pair.size == invoice.size) {
+          pair.quantity++;
+          console.log(
+            "return - completed again : increasing quantity of " +
+              invoice.article +
+              " : " +
+              invoice.color
+          );
+        }
+      }
+      await productOperations.update_product(invoice.product_id, product);
+    }
+    await InvoiceModel.updateOne(
+      { invoice_no: oldInvoice.invoice_no },
+      {
+        $set: {
+          article: invoice.article,
+          color: invoice.color,
+          cost_price: invoice.cost_price,
+          description: invoice.description,
+          invoice_date: invoice.invoice_date,
+          invoice_no: invoice.invoice_no,
+          invoice_status: invoice.invoice_status,
+          mrp: invoice.mrp,
+          payment_mode: invoice.payment_mode,
+          payment_status: invoice.payment_status,
+          product_id: invoice.product_id,
+          profit: invoice.profit,
+          selling_price: invoice.selling_price,
+          size: invoice.size,
+          sold_at: invoice.solt_at,
+          vendor: invoice.vendor,
+        },
+      }
+    );
+  },
 };
