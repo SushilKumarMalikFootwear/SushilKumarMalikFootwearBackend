@@ -64,9 +64,17 @@ module.exports = {
     let oldInvoice = await InvoiceModel.findOne({
       invoice_no: invoice.invoice_no,
     });
+    console.log("old invoice - ", oldInvoice);
+    console.log("new invoice - ", invoice);
     let product = await productOperations.view_by_id(invoice.product_id);
     if (invoice.invoice_date != oldInvoice.invoice_date) {
       invoice.invoice_no = getNextInvoiceNumber(invoice.invoice_date);
+      console.log(
+        "updating invoice no, old invoice no - ",
+        oldInvoice.invoice_no,
+        " new invoice no - ",
+        invoice.invoice_no
+      );
     }
     if (
       (invoice.size != oldInvoice.size ||
@@ -103,6 +111,20 @@ module.exports = {
       invoice.cost_price != oldInvoice.cost_price ||
       invoice.selling_price != oldInvoice.selling_price
     ) {
+      console.log(
+        "updating old invoice cost price - ",
+        oldInvoice.cost_price,
+        " new cost price - ",
+        invoice.cost_price,
+        " old selling price - ",
+        oldInvoice.selling_price,
+        " new selling price - ",
+        invoice.selling_price,
+        " old profit - ",
+        oldInvoice.profit,
+        " new profit - ",
+        invoice.profit
+      );
       await traderFinancesOperation.updateFinancesByTraderName(
         invoice.vendor,
         invoice.cost_price - oldInvoice.cost_price,
@@ -130,6 +152,7 @@ module.exports = {
           );
         }
       }
+      console.log("invoice no - ", invoice.invoice_no, " is returned");
       await productOperations.update_product(invoice.product_id, product);
     }
     if (
@@ -153,6 +176,12 @@ module.exports = {
           );
         }
       }
+      console.log(
+        "invoice no - ",
+        invoice.invoice_no,
+        " was returned and is completed again"
+      );
+
       await productOperations.update_product(invoice.product_id, product);
     }
     await InvoiceModel.updateOne(
