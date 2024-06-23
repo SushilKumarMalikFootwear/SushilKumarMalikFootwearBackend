@@ -207,5 +207,6 @@ module.exports = {
         },
       }
     );
+    return invoice;
   },
 };

@@ -19,6 +19,7 @@ module.exports = {
         GET_CONFIF_LISTS:'/get_config_lists',
         INVOICE:{
             SAVE_INVOICE:'/saveInvoice',
+            UPDATE_INVOICE:'/updateInvoice',
             FETCH_INVOICES:'/fetchInvoices'
         },
         PRODUCT:{

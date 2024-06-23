@@ -40,5 +40,23 @@ const invoiceController = {
         });
       });
   },
+  update(request, response) {
+    let invoiceObject = request.body;
+    let promise = invoiceOperations.updateInvoice(
+      invoiceObject
+    );
+    promise
+      .then((doc) => {
+        response
+          .status(SUCCESS)
+          .json({ message: messageBundle['update.successful'], doc: doc });
+      })
+      .catch((err) => {
+        response.status(SERVER_CRASH).json({
+          message: messageBundle["update.unsuccessful"],
+          ERROR: err.toString(),
+        });
+      });
+  },
 };
 module.exports = invoiceController;
