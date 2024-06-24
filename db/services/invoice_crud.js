@@ -27,7 +27,8 @@ module.exports = {
         invoice.selling_price
       );
     }
-    if (!invoice.product_id || addInTotalCost) {
+    if (!invoice.product_id || addInTotalCost=='true') {
+      console.log('updating total cost')
       await traderFinancesOperation.updateFinancesByTraderName2(
         invoice.vendor,
         invoice.cost_price,

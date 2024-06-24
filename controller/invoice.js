@@ -4,8 +4,8 @@ const messageBundle = require("../locales/en");
 const invoiceOperations = require("../db/services/invoice_crud");
 const invoiceController = {
   add(request, response) {
-    let isOldInvoice = request.query.isOldInvoice;
-    let addInTotalCost = request.query.addInTotalCost;
+    let isOldInvoice = request.query.isOldInvoice.toString();
+    let addInTotalCost = request.query.addInTotalCost.toString();
     let invoiceObject = request.body;
     let promise = invoiceOperations.save_invoice(
       invoiceObject,

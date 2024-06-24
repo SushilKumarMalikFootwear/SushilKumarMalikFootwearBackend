@@ -6,30 +6,13 @@ module.exports = {
     return promise;
   },
   async applyChanges() {
-    const footwears = await FootwearModel.find();
-    let duplicates = {};
-    for (let i = 0; i < footwears.length; i++) {
-      let footwear = footwears[i];
-      const key = `${footwear.article}_${footwear.color}`;
-      console.log(key)
-      if (!duplicates[key]) {
-        duplicates[key] = [];
-      }
-      duplicates[key].push(footwear);
+    const invoices = await InvoiceModel.find({'vendor':'Baba Footwear'})
+    let sum = 0;
+    for(let i = 0; i<invoices.length; i++){
+      let invoice = invoices[i];
+      sum+=invoice.selling_price;
     }
-    for (const key in duplicates) {
-      const footwearGroup = duplicates[key];
-      if (footwearGroup.length > 1) {
-        footwearGroup.forEach(async (footwear) => {
-          const newArticle = `${footwear.article} ${footwear.size_range}`;
-          console.log(newArticle);
-          await FootwearModel.updateOne(
-            { _id: footwear._id },
-            { $set: { article: newArticle } }
-          );
-        });
-      }
-    }
+    console.log(sum)
   },
   async view_all_products(out_of_stock) {
     try {
