@@ -6,13 +6,11 @@ module.exports = {
     return promise;
   },
   async applyChanges() {
-    const invoices = await InvoiceModel.find({'vendor':'Baba Footwear'})
-    let sum = 0;
-    for(let i = 0; i<invoices.length; i++){
-      let invoice = invoices[i];
-      sum+=invoice.selling_price;
-    }
-    console.log(sum)
+    let update = await InvoiceModel.updateMany(
+      {},
+      { $set: { add_in_total_cost: false } }
+    );
+    console.log(update);
   },
   async view_all_products(out_of_stock) {
     try {
