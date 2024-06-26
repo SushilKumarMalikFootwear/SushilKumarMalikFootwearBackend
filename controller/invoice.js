@@ -9,8 +9,7 @@ const invoiceController = {
     let invoiceObject = request.body;
     let promise = invoiceOperations.save_invoice(
       invoiceObject,
-      isOldInvoice,
-      addInTotalCost
+      isOldInvoice
     );
     promise
       .then((doc) => {

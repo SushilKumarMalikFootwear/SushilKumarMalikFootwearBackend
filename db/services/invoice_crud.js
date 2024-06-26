@@ -2,7 +2,7 @@ const InvoiceModel = require("../models/invoice");
 const productOperations = require("./product_crud");
 const traderFinancesOperation = require("./trader_finances");
 module.exports = {
-  async save_invoice(invoice, isOldInvoice, addInTotalCost) {
+  async save_invoice(invoice, isOldInvoice) {
     invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
     if (invoice.product_id) {
       let product = await productOperations.view_by_id(invoice.product_id);
@@ -27,7 +27,7 @@ module.exports = {
         invoice.selling_price
       );
     }
-    if (!invoice.product_id || addInTotalCost=='true') {
+    if (!invoice.product_id || invoice.addInTotalCost==true) {
       console.log('updating total cost')
       await traderFinancesOperation.updateFinancesByTraderName2(
         invoice.vendor,
