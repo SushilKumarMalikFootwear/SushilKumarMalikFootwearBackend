@@ -69,7 +69,7 @@ module.exports = {
     console.log("new invoice - ", invoice);
     let product = await productOperations.view_by_id(invoice.product_id);
     if (invoice.invoice_date != oldInvoice.invoice_date) {
-      invoice.invoice_no = getNextInvoiceNumber(invoice.invoice_date);
+      invoice.invoice_no = this.getNextInvoiceNumber(invoice.invoice_date);
       console.log(
         "updating invoice no, old invoice no - ",
         oldInvoice.invoice_no,

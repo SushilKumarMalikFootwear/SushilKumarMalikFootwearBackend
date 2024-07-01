@@ -6,11 +6,6 @@ module.exports = {
     return promise;
   },
   async applyChanges() {
-    let update = await InvoiceModel.updateMany(
-      {},
-      { $set: { add_in_total_cost: false } }
-    );
-    console.log(update);
   },
   async view_all_products(out_of_stock) {
     try {
