@@ -27,8 +27,8 @@ module.exports = {
         invoice.selling_price
       );
     }
-    if (!invoice.product_id || invoice.addInTotalCost==true) {
-      console.log('updating total cost')
+    if (!invoice.product_id || invoice.addInTotalCost == true) {
+      console.log("updating total cost");
       await traderFinancesOperation.updateFinancesByTraderName2(
         invoice.vendor,
         invoice.cost_price,
@@ -57,6 +57,31 @@ module.exports = {
     const invoiceNumber = `${datePart}${countPart}`;
     return invoiceNumber;
   },
+  compareDates(date1, date2) {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+
+    // Check if the dates are valid
+    if (isNaN(d1) || isNaN(d2)) {
+      return 0;
+    }
+
+    // Extract day, month, and year
+    const day1 = d1.getDate();
+    const month1 = d1.getMonth(); // Months are zero-based in JavaScript
+    const year1 = d1.getFullYear();
+
+    const day2 = d2.getDate();
+    const month2 = d2.getMonth();
+    const year2 = d2.getFullYear();
+
+    // Compare day, month, and year
+    if (day1 === day2 && month1 === month2 && year1 === year2) {
+      return 0;
+    } else {
+      return 1;
+    }
+  },
   fetchInvoices() {
     let promise = InvoiceModel.find();
     return promise;
@@ -66,10 +91,12 @@ module.exports = {
       invoice_no: invoice.invoice_no,
     });
     console.log("old invoice - ", oldInvoice);
-    console.log("new invoice - ", invoice);
+    console.log("received invoice - ", invoice);
     let product = await productOperations.view_by_id(invoice.product_id);
-    if (invoice.invoice_date != oldInvoice.invoice_date) {
-      invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
+    if (this.compareDates(invoice.invoice_date,oldInvoice.invoice_date)==0) {
+      invoice.invoice_no = await this.getNextInvoiceNumber(
+        invoice.invoice_date
+      );
       console.log(
         "updating invoice no, old invoice no - ",
         oldInvoice.invoice_no,
@@ -182,7 +209,7 @@ module.exports = {
         invoice.invoice_no,
         " was returned and is completed again"
       );
-
+      console.log("saving invoice - ", invoice);
       await productOperations.update_product(invoice.product_id, product);
     }
     await InvoiceModel.updateOne(
