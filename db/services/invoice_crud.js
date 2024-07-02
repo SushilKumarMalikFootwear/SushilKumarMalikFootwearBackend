@@ -93,7 +93,7 @@ module.exports = {
     console.log("old invoice - ", oldInvoice);
     console.log("received invoice - ", invoice);
     let product = await productOperations.view_by_id(invoice.product_id);
-    if (this.compareDates(invoice.invoice_date,oldInvoice.invoice_date)!=0) {
+    if (this.compareDates(invoice.invoice_date, oldInvoice.invoice_date) != 0) {
       invoice.invoice_no = await this.getNextInvoiceNumber(
         invoice.invoice_date
       );
@@ -120,7 +120,9 @@ module.exports = {
             "edit : increasing quantity of " +
               oldInvoice.article +
               " : " +
-              oldInvoice.color
+              oldInvoice.color +
+              " : " +
+              oldInvoice.size
           );
         }
         if (pair.available_at == invoice.sold_at && pair.size == invoice.size) {
@@ -129,7 +131,9 @@ module.exports = {
             "edit : reducing quantity of " +
               invoice.article +
               " : " +
-              invoice.color
+              invoice.color +
+              " : " +
+              invoice.size
           );
         }
       }
@@ -176,7 +180,9 @@ module.exports = {
             "return : increasing quantity of " +
               invoice.article +
               " : " +
-              invoice.color
+              invoice.color +
+              " : " +
+              invoice.size
           );
         }
       }
@@ -200,7 +206,9 @@ module.exports = {
             "return - completed again : increasing quantity of " +
               invoice.article +
               " : " +
-              invoice.color
+              invoice.color +
+              " : " +
+              invoice.size
           );
         }
       }
@@ -230,7 +238,7 @@ module.exports = {
           profit: invoice.profit,
           selling_price: invoice.selling_price,
           size: invoice.size,
-          sold_at: invoice.solt_at,
+          sold_at: invoice.sold_at,
           vendor: invoice.vendor,
         },
       }
