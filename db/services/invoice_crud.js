@@ -93,7 +93,7 @@ module.exports = {
     console.log("old invoice - ", oldInvoice);
     console.log("received invoice - ", invoice);
     let product = await productOperations.view_by_id(invoice.product_id);
-    if (this.compareDates(invoice.invoice_date,oldInvoice.invoice_date)==0) {
+    if (this.compareDates(invoice.invoice_date,oldInvoice.invoice_date)!=0) {
       invoice.invoice_no = await this.getNextInvoiceNumber(
         invoice.invoice_date
       );
