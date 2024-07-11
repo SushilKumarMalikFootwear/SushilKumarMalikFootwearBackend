@@ -29,6 +29,7 @@ module.exports = {
     }
     if (!invoice.product_id || invoice.addInTotalCost == true) {
       console.log("updating total cost");
+      invoice.addInTotalCost == true
       await traderFinancesOperation.updateFinancesByTraderName2(
         invoice.vendor,
         invoice.cost_price,
@@ -203,7 +204,7 @@ module.exports = {
         if (pair.available_at == invoice.sold_at && pair.size == invoice.size) {
           pair.quantity++;
           console.log(
-            "return - completed again : increasing quantity of " +
+            "return - completed again : reducing quantity of " +
               invoice.article +
               " : " +
               invoice.color +
@@ -240,6 +241,7 @@ module.exports = {
           size: invoice.size,
           sold_at: invoice.sold_at,
           vendor: invoice.vendor,
+          addInTotalCost : invoice.addInTotalCost
         },
       }
     );
