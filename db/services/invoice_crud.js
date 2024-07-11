@@ -27,9 +27,9 @@ module.exports = {
         invoice.selling_price
       );
     }
-    if (!invoice.product_id || invoice.addInTotalCost == true) {
+    if (!invoice.product_id || invoice.add_in_total_cost == true) {
       console.log("updating total cost");
-      invoice.addInTotalCost == true
+      invoice.add_in_total_cost == true
       await traderFinancesOperation.updateFinancesByTraderName2(
         invoice.vendor,
         invoice.cost_price,
@@ -241,7 +241,7 @@ module.exports = {
           size: invoice.size,
           sold_at: invoice.sold_at,
           vendor: invoice.vendor,
-          addInTotalCost : invoice.addInTotalCost
+          add_in_total_cost : invoice.add_in_total_cost
         },
       }
     );

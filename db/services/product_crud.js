@@ -6,6 +6,49 @@ module.exports = {
     return promise;
   },
   async applyChanges() {
+    let trader_finances = {
+      "Baba Footwear": {
+        total_cost_price: 122433,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Gupta Footwear": {
+        total_cost_price: 206149,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "R.S. Trading": {
+        total_cost_price: 249694,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Raj Traders": {
+        total_cost_price: 100334,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "S. Kumar": {
+        total_cost_price: 53290,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Relaxo Delhi": {
+        total_cost_price: 1162,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+    };
+    let invoices = await InvoiceModel.find();
+    for(let i = 0; i < invoices.length; i++){
+      let invoice = invoices[i];
+      let trader = trader_finances[invoice.vendor];
+      trader['cost_price_of_sold']+=invoice.cost_price
+      trader['selling_price_of_sold']+=invoice.selling_price
+      if(!invoice.product_id || invoice.add_in_total_cost){
+        trader['total_cost_price']+=invoice.cost_price
+      }
+    }
+    console.log(trader_finances)
   },
   async view_all_products(out_of_stock) {
     try {
