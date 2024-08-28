@@ -8,7 +8,7 @@ module.exports = {
   async applyChanges() {
     let trader_finances = {
       "Baba Footwear": {
-        total_cost_price: 153558,
+        total_cost_price: 162467,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -18,17 +18,17 @@ module.exports = {
         selling_price_of_sold: 0,
       },
       "R.S. Trading": {
-        total_cost_price: 248916,
+        total_cost_price: 260978,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Raj Traders": {
-        total_cost_price: 121592,
+        total_cost_price: 129231,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "S. Kumar": {
-        total_cost_price: 57490,
+        total_cost_price: 86125,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -37,6 +37,11 @@ module.exports = {
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
+      "S. Kumar Neighbour": {
+        total_cost_price: 880,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      }
     };
     let invoices = await InvoiceModel.find();
     for (let i = 0; i < invoices.length; i++) {
@@ -45,9 +50,10 @@ module.exports = {
         let trader = trader_finances[invoice.vendor];
         trader["cost_price_of_sold"] += invoice.cost_price;
         trader["selling_price_of_sold"] += invoice.selling_price;
-        if (!invoice.product_id || invoice.add_in_total_cost) {
+        if (invoice.add_in_total_cost) {
           trader["total_cost_price"] += invoice.cost_price;
         }
+
       }
     }
     console.log(trader_finances);

@@ -21,17 +21,18 @@ module.exports = {
         console.log("updating quantity");
         await productOperations.update_product(invoice.product_id, product);
       }
-      await traderFinancesOperation.updateFinancesByTraderName(
-        product.vendor,
-        invoice.cost_price,
-        invoice.selling_price
-      );
     }
     if (!invoice.product_id || invoice.add_in_total_cost == true) {
       console.log("updating total cost");
       invoice.add_in_total_cost == true
       await traderFinancesOperation.updateFinancesByTraderName2(
         invoice.vendor,
+        invoice.cost_price,
+        invoice.selling_price
+      );
+    } else {
+      await traderFinancesOperation.updateFinancesByTraderName(
+        product.vendor,
         invoice.cost_price,
         invoice.selling_price
       );
