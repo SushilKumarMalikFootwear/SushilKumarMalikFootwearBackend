@@ -8,7 +8,7 @@ module.exports = {
   async applyChanges() {
     let trader_finances = {
       "Baba Footwear": {
-        total_cost_price: 162467,
+        total_cost_price: 169046,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -18,17 +18,17 @@ module.exports = {
         selling_price_of_sold: 0,
       },
       "R.S. Trading": {
-        total_cost_price: 260978,
+        total_cost_price: 262688,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Raj Traders": {
-        total_cost_price: 129231,
+        total_cost_price: 132587,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "S. Kumar": {
-        total_cost_price: 86125,
+        total_cost_price: 90125,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -38,7 +38,7 @@ module.exports = {
         selling_price_of_sold: 0,
       },
       "S. Kumar Neighbour": {
-        total_cost_price: 880,
+        total_cost_price: 970,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       }
