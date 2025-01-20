@@ -453,6 +453,7 @@ const productController = {
         images: request.body.images,
         vendor: request.body.vendor,
         out_of_stock: request.body.out_of_stock,
+        label:request.body.label
       };
       let product = await productOperations.update_product(
         footwear_id,

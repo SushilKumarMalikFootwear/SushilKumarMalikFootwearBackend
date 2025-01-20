@@ -6,39 +6,75 @@ module.exports = {
     return promise;
   },
   async applyChanges() {
+    // code for finging correct trader finances
     let trader_finances = {
       "Baba Footwear": {
-        total_cost_price: 169046,
+        total_cost_price: 199603,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Gupta Footwear": {
-        total_cost_price: 206149,
+        total_cost_price: 322539,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "R.S. Trading": {
-        total_cost_price: 262688,
+        total_cost_price: 331999,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Raj Traders": {
-        total_cost_price: 132587,
+        total_cost_price: 168936,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "S. Kumar": {
-        total_cost_price: 90125,
+        total_cost_price: 123085,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Relaxo Delhi": {
-        total_cost_price: 3942,
+        total_cost_price: 4582,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "S. Kumar Neighbour": {
-        total_cost_price: 970,
+        total_cost_price: 1360,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "J.K. Enterprise": {
+        total_cost_price: 19300,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "JHA HOSIERY": {
+        total_cost_price: 1900,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Rivaldo Sports": {
+        total_cost_price: 19100,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Sapraa Footwear": {
+        total_cost_price: 20510,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Milap Agencies": {
+        total_cost_price: 8195,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Amir Footwear": {
+        total_cost_price: 6410,
+        cost_price_of_sold: 0,
+        selling_price_of_sold: 0,
+      },
+      "Karol Bagh Vendors": {
+        total_cost_price: 930,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       }
@@ -57,6 +93,50 @@ module.exports = {
       }
     }
     console.log(trader_finances);
+    for (const traderName in trader_finances) {
+      if (trader_finances.hasOwnProperty(traderName)) {
+        const update = await TraderFinances.updateOne(
+          { trader_name: traderName },
+          {
+            $set: {
+              total_cost_price: trader_finances[traderName].total_cost_price,
+              cost_price_of_sold: trader_finances[traderName].cost_price_of_sold,
+              selling_price_of_sold: trader_finances[traderName].selling_price_of_sold,
+            },
+          }
+        );
+        console.log(`Updated ${traderName}:`, update);
+      }
+    }
+
+
+    // code to find -ve pairs in stock
+    // let products = await FootwearModel.find();
+    // for(let i = 0; i< products.length; i++){
+    //   let product = products[i];
+    //   for(let j=0; j<product.pairs_in_stock.length; j++){
+    //     let pair = product.pairs_in_stock[j];
+    //     if(pair['quantity']<0){
+    //       console.log(product.article+ product.color);
+    //     }
+    //   }
+    // }
+
+    // const startOfDay = new Date('2024-12-15T00:00:00Z'); // Start of the day (UTC)
+    // const endOfDay = new Date('2024-12-15T23:59:59.999Z'); // End of the day (UTC)
+
+    // let inv1 = await InvoiceModel.find({
+    //   invoice_date: { $gte: startOfDay, $lte: endOfDay }, // createdAt within 14-12-2024
+    // })
+
+    // let inv2 = await InvoiceModel.find({createdAt: { $gte: startOfDay, $lte: endOfDay }});
+
+    // for(let i = 0; i < 47; i++){
+    //   if(inv1[i].article!=inv2[i].article){
+    //     console.log( "1 - "+inv1[i].article);
+    //     console.log("2 - "+inv2[i].article)
+    //   }
+    // }
   },
   async view_all_products(out_of_stock) {
     try {
