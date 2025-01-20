@@ -743,6 +743,7 @@ module.exports = {
             images: footwearObject.images,
             vendor: footwearObject.vendor,
             out_of_stock: out_of_stock,
+            label:footwearObject.label
           },
         }
       );
