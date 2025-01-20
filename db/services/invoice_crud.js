@@ -22,7 +22,7 @@ module.exports = {
         await productOperations.update_product(invoice.product_id, product);
       }
     }
-    if (!invoice.product_id || invoice.add_in_total_cost == true) {
+    if (invoice.add_in_total_cost == true) {
       console.log("updating total cost");
       invoice.add_in_total_cost == true
       await traderFinancesOperation.updateFinancesByTraderName2(
