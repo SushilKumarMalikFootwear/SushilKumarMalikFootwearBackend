@@ -56,5 +56,20 @@ const invoiceController = {
         });
       });
   },
+  monthlySalesReport(request, response){
+    let promise = invoiceOperations.getMonthlySalesReport();
+    promise
+      .then((doc) => {
+        response
+          .status(SUCCESS)
+          .json({ message: messageBundle['successful'], doc: doc });
+      })
+      .catch((err) => {
+        response.status(SERVER_CRASH).json({
+          message: messageBundle["unsuccessful"],
+          ERROR: err.toString(),
+        });
+      });
+  }
 };
 module.exports = invoiceController;

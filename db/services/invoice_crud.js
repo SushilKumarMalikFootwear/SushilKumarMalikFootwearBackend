@@ -24,19 +24,21 @@ module.exports = {
     }
     if (invoice.add_in_total_cost == true) {
       console.log("updating total cost");
-      invoice.add_in_total_cost == true
-      await traderFinancesOperation.updateFinancesByTraderName2(
+      invoice.add_in_total_cost == true;
+      await traderFinancesOperation.updateTotalCostPrice(
         invoice.vendor,
-        invoice.cost_price,
-        invoice.selling_price
-      );
-    } else {
-      await traderFinancesOperation.updateFinancesByTraderName(
-        invoice.vendor,
-        invoice.cost_price,
-        invoice.selling_price
+        invoice.cost_price
       );
     }
+    await traderFinancesOperation.updateCostPriceOfSold(
+      invoice.vendor,
+      invoice.cost_price
+    );
+    await traderFinancesOperation.updateSellingPriceOfSold(
+      invoice.vendor,
+      invoice.selling_price
+    );
+
     let promise = InvoiceModel.create(invoice);
     promise.then((val) => {
       console.log("invoice created " + invoice.invoice_no);
@@ -95,6 +97,18 @@ module.exports = {
     console.log("old invoice - ", oldInvoice);
     console.log("received invoice - ", invoice);
     let product = await productOperations.view_by_id(invoice.product_id);
+    if (oldInvoice.add_in_total_cost && !invoice.add_in_total_cost) {
+      await traderFinancesOperation.updateTotalCostPrice(
+        invoice.vendor,
+        -invoice.cost_price
+      );
+    }
+    if (!oldInvoice.add_in_total_cost && invoice.add_in_total_cost) {
+      await traderFinancesOperation.updateTotalCostPrice(
+        invoice.vendor,
+        invoice.cost_price
+      );
+    }
     if (this.compareDates(invoice.invoice_date, oldInvoice.invoice_date) != 0) {
       invoice.invoice_no = await this.getNextInvoiceNumber(
         invoice.invoice_date
@@ -159,9 +173,12 @@ module.exports = {
         " new profit - ",
         invoice.profit
       );
-      await traderFinancesOperation.updateFinancesByTraderName(
+      await traderFinancesOperation.updateCostPriceOfSold(
         invoice.vendor,
-        invoice.cost_price - oldInvoice.cost_price,
+        invoice.cost_price - oldInvoice.cost_price
+      );
+      await traderFinancesOperation.updateSellingPriceOfSold(
+        invoice.vendor,
         invoice.selling_price - oldInvoice.selling_price
       );
     }
@@ -169,9 +186,12 @@ module.exports = {
       invoice.invoice_status == "RETURNED" &&
       oldInvoice.invoice_status == "COMPLETED"
     ) {
-      await traderFinancesOperation.updateFinancesByTraderName(
+      await traderFinancesOperation.updateCostPriceOfSold(
         invoice.vendor,
-        -invoice.cost_price,
+        -invoice.cost_price
+      );
+      await traderFinancesOperation.updateSellingPriceOfSold(
+        invoice.vendor,
         -invoice.selling_price
       );
       for (let i = 0; i < product["pairs_in_stock"].length; i++) {
@@ -195,9 +215,12 @@ module.exports = {
       invoice.invoice_status == "COMPLETED" &&
       oldInvoice.invoice_status == "RETURNED"
     ) {
-      await traderFinancesOperation.updateFinancesByTraderName(
+      await traderFinancesOperation.updateCostPriceOfSold(
         invoice.vendor,
-        invoice.cost_price,
+        invoice.cost_price
+      );
+      await traderFinancesOperation.updateSellingPriceOfSold(
+        invoice.vendor,
         invoice.selling_price
       );
       for (let i = 0; i < product["pairs_in_stock"].length; i++) {
@@ -242,10 +265,97 @@ module.exports = {
           size: invoice.size,
           sold_at: invoice.sold_at,
           vendor: invoice.vendor,
-          add_in_total_cost : invoice.add_in_total_cost
+          add_in_total_cost: invoice.add_in_total_cost,
         },
       }
     );
     return invoice;
+  },
+  async getMonthlySalesReport() {
+    let salesData = await InvoiceModel.aggregate([
+      {
+        $match: {
+          invoice_status: "COMPLETED",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $dateToString: { format: "%Y-%m", date: "$invoice_date" },
+            },
+            place: "$sold_at",
+            day: {
+              $dateToString: { format: "%Y-%m-%d", date: "$invoice_date" },
+            }, // Extract unique day
+          },
+          totalSP: { $sum: "$selling_price" },
+          totalProfit: { $sum: "$profit" },
+          totalInvoices: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: { month: "$_id.month", place: "$_id.place" },
+          totalSP: { $sum: "$totalSP" },
+          totalProfit: { $sum: "$totalProfit" },
+          totalInvoices: { $sum: "$totalInvoices" },
+          uniqueDays: { $addToSet: "$_id.day" }, // Collect unique days in a set
+        },
+      },
+      {
+        $addFields: {
+          numDays: { $size: "$uniqueDays" }, // Count unique days
+          dailyAvgSales: {
+            $round: [
+              {
+                $cond: {
+                  if: { $gt: [{ $size: "$uniqueDays" }, 0] },
+                  then: { $divide: ["$totalSP", { $size: "$uniqueDays" }] },
+                  else: 0,
+                },
+              },
+              0, // Round to nearest integer
+            ],
+          },
+          dailyAvgInvoices: {
+            $round: [
+              {
+                $cond: {
+                  if: { $gt: [{ $size: "$uniqueDays" }, 0] },
+                  then: {
+                    $divide: ["$totalInvoices", { $size: "$uniqueDays" }],
+                  },
+                  else: 0,
+                },
+              },
+              0, // Round to nearest integer
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.month",
+          sales: {
+            $push: {
+              place: "$_id.place",
+              totalSP: "$totalSP",
+              totalProfit: "$totalProfit",
+              totalInvoices: "$totalInvoices",
+              numDays: "$numDays",
+              dailyAvgSales: "$dailyAvgSales",
+              dailyAvgInvoices: "$dailyAvgInvoices",
+            },
+          },
+        },
+      },
+      {
+        $sort: { _id: 1 }, // Sort by month
+      },
+    ]);
+
+    console.log(salesData);
+    return salesData;
   },
 };

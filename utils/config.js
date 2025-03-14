@@ -20,7 +20,8 @@ module.exports = {
         INVOICE:{
             SAVE_INVOICE:'/saveInvoice',
             UPDATE_INVOICE:'/updateInvoice',
-            FETCH_INVOICES:'/fetchInvoices'
+            FETCH_INVOICES:'/fetchInvoices',
+            MONTHLY_SALES_REPORT:'/monthlySalesReport'
         },
         PRODUCT:{
             addFootwear:'/add_footwear',
