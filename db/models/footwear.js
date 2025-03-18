@@ -18,6 +18,7 @@ const footwearSchema = new Schema(
     cost_price: { type: SchemaTypes.Number },
     category: { type: SchemaTypes.String },
     label:{type: SchemaTypes.String},
+    rating: { type: SchemaTypes.Number },
     color: { type: SchemaTypes.String },
     pairs_in_stock: {type:[footwear_pair_schema]},
     size_range: { type: SchemaTypes.String },

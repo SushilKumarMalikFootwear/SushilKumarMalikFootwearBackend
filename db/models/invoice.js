@@ -19,6 +19,7 @@ const invoiceSchema = new Schema(
     add_in_total_cost: { type: SchemaTypes.Boolean },
     sold_at: { type: SchemaTypes.String }, //HOME or SHOP
     payment_mode: { type: SchemaTypes.String }, // CASH/UPI
+    pending_amount: { type: SchemaTypes.Number },
     payment_status: { type: SchemaTypes.String }, //PENDING/PAID
     invoice_status: { type: SchemaTypes.String }, //completed / returned
   },

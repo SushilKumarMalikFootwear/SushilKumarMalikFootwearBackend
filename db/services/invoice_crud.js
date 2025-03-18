@@ -266,6 +266,7 @@ module.exports = {
           sold_at: invoice.sold_at,
           vendor: invoice.vendor,
           add_in_total_cost: invoice.add_in_total_cost,
+          pending_amount : invoice.pending_amount
         },
       }
     );
