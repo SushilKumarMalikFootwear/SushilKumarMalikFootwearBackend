@@ -3,7 +3,8 @@ module.exports = {
         FOOTWEAR:'footwear',
         INVOICE: 'invoice',
         CONFIG_LISTS:'config_lists',
-        TRADER_FINANCES: 'trader_finances'
+        TRADER_FINANCES: 'trader_finances',
+        TRADER_FINANCES_LOGS: 'trader_finances_logs'
     },
     STATUS_CODES:{
         SUCCESS:200,

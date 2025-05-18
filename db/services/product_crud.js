@@ -1,5 +1,6 @@
 const FootwearModel = require("../models/footwear");
 const InvoiceModel = require("../models/invoice");
+const TraderFinances = require("../models/tarder_finances");
 module.exports = {
   add_product(footwearObject) {
     let promise = FootwearModel.create(footwearObject);
@@ -9,32 +10,32 @@ module.exports = {
     // code for finging correct trader finances
     let trader_finances = {
       "Baba Footwear": {
-        total_cost_price: 199603,
+        total_cost_price: 227311,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Gupta Footwear": {
-        total_cost_price: 322539,
+        total_cost_price: 381212,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "R.S. Trading": {
-        total_cost_price: 331999,
+        total_cost_price: 395587,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Raj Traders": {
-        total_cost_price: 168936,
+        total_cost_price: 247311,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "S. Kumar": {
-        total_cost_price: 123085,
+        total_cost_price: 134725,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Relaxo Delhi": {
-        total_cost_price: 4582,
+        total_cost_price: 5302,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -44,7 +45,7 @@ module.exports = {
         selling_price_of_sold: 0,
       },
       "J.K. Enterprise": {
-        total_cost_price: 19300,
+        total_cost_price: 60874,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -54,12 +55,12 @@ module.exports = {
         selling_price_of_sold: 0,
       },
       "Rivaldo Sports": {
-        total_cost_price: 19100,
+        total_cost_price: 41230,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
       "Sapraa Footwear": {
-        total_cost_price: 20510,
+        total_cost_price: 75844,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -69,7 +70,7 @@ module.exports = {
         selling_price_of_sold: 0,
       },
       "Amir Footwear": {
-        total_cost_price: 6410,
+        total_cost_price: 14230,
         cost_price_of_sold: 0,
         selling_price_of_sold: 0,
       },
@@ -79,6 +80,12 @@ module.exports = {
         selling_price_of_sold: 0,
       }
     };
+    // let update = await InvoiceModel.updateMany(
+    //   {},
+    //   { $set: { pending_amount: 0.0 } }
+    // );
+    // console.log(update);
+    // update = await FootwearModel.updateMany({}, { $set: { rating: 0.0 } });
     let invoices = await InvoiceModel.find();
     for (let i = 0; i < invoices.length; i++) {
       let invoice = invoices[i];
@@ -108,7 +115,6 @@ module.exports = {
         console.log(`Updated ${traderName}:`, update);
       }
     }
-
 
     // code to find -ve pairs in stock
     // let products = await FootwearModel.find();
@@ -743,8 +749,8 @@ module.exports = {
             images: footwearObject.images,
             vendor: footwearObject.vendor,
             out_of_stock: out_of_stock,
-            label:footwearObject.label,
-            rating:footwearObject.rating
+            label: footwearObject.label,
+            rating: footwearObject.rating,
           },
         }
       );
