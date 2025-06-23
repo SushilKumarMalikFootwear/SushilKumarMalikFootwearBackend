@@ -4,12 +4,13 @@ const mongoose = require("../connect");
 
 const traderFinancesLogsSchema = new Schema({
     id:    { type: SchemaTypes.String },
+    description:    { type: SchemaTypes.String },
     date: { type: SchemaTypes.Date },
     type:{ type: SchemaTypes.String }, //PURCHASE, PAYMENT, CLAIM
   trader_name: { type: SchemaTypes.String },
+  bill_ids : { type: SchemaTypes.Array }, //in case of PAYMENT
   pending_amount: { type: SchemaTypes.Number },
   amount: { type: SchemaTypes.Number },
-  selling_price_of_sold: { type: SchemaTypes.Number },
 });
 const TraderFinancesLogsModel = mongoose.model(TRADER_FINANCES_LOGS, traderFinancesLogsSchema);
 module.exports = TraderFinancesLogsModel;
