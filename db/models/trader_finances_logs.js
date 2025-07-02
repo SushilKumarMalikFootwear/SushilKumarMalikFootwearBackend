@@ -9,6 +9,8 @@ const traderFinancesLogsSchema = new Schema({
     type:{ type: SchemaTypes.String }, //PURCHASE, PAYMENT, CLAIM
   trader_name: { type: SchemaTypes.String },
   bill_ids : { type: SchemaTypes.Array }, //in case of PAYMENT
+  payment_mode : {type: SchemaTypes.String}, //in case of PAYMENT
+  running_pending_payment: {type : SchemaTypes.Number}, 
   pending_amount: { type: SchemaTypes.Number },
   amount: { type: SchemaTypes.Number },
 });
