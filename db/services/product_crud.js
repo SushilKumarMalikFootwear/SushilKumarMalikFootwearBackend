@@ -751,6 +751,7 @@ module.exports = {
             out_of_stock: out_of_stock,
             label: footwearObject.label,
             rating: footwearObject.rating,
+            updated: footwearObject.updated,
           },
         }
       );
