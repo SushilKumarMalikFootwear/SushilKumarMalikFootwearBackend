@@ -24,7 +24,8 @@ const footwearSchema = new Schema(
     size_range: { type: SchemaTypes.String },
     description:{type:SchemaTypes.String},
     vendor: { type: SchemaTypes.String },
-    images:{type:SchemaTypes.Array}
+    images:{type:SchemaTypes.Array},
+    updated: {type: SchemaTypes.Boolean},
   },
   {
     timestamps: true, //this will add time in data object when the  is created in database
