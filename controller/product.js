@@ -455,7 +455,8 @@ const productController = {
         out_of_stock: request.body.out_of_stock,
         label:request.body.label,
         rating:request.body.rating,
-        updated: request.body.updated
+        updated: request.body.updated,
+        size_description:request.body.size_description
       };
       let product = await productOperations.update_product(
         footwear_id,
