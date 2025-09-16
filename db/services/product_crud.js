@@ -752,6 +752,7 @@ module.exports = {
             label: footwearObject.label,
             rating: footwearObject.rating,
             updated: footwearObject.updated,
+            size_description: footwearObject.size_description
           },
         }
       );
