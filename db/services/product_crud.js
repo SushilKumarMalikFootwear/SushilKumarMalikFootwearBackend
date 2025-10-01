@@ -554,7 +554,7 @@ module.exports = {
   },
   async view_by_product_id(footwear_id) {
     try {
-      let footwear = await FootwearModel.findById(footwear_id);
+      let footwear = await FootwearModel.find({ footwear_id: footwear_id });
       if (footwear) {
         return footwear;
       } else {
