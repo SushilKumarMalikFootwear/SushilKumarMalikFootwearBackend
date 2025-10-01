@@ -86,9 +86,98 @@ module.exports = {
       return 1;
     }
   },
-  fetchInvoices() {
-    let promise = InvoiceModel.find();
-    return promise;
+  async fetchInvoices(filters) {
+    const filterMap = req.body || {};
+
+    const article = filterMap.article || "";
+    const size = filterMap.size || "";
+    const color = filterMap.color || "";
+    const date = filterMap.date || "";
+    const soldAt = filterMap.soldAt || "";
+    const paymentPending = filterMap.paymentPending === true;
+    const returnedInvoice = filterMap.returnedInvoice === true;
+
+    const selectedDateRangeStartDate =
+      filterMap.selectedDateRangeStartDate ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days back
+    const selectedDateRangeEndDate =
+      filterMap.selectedDateRangeEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    // Parse date if provided
+    let dateFilter = null;
+    if (date) {
+      try {
+        dateFilter = new Date(date);
+      } catch (err) {
+        dateFilter = null;
+      }
+    }
+
+    // Build pipeline
+    const pipeline = [];
+
+    if (dateFilter) {
+      pipeline.push({
+        $match: {
+          invoice_date: {
+            $gte: new Date(toISODate(dateFilter)),
+            $lt: new Date(toISODate(new Date(dateFilter).setDate(dateFilter.getDate() + 1))),
+          },
+        },
+      });
+    } else {
+      pipeline.push({
+        $match: {
+          invoice_date: {
+            $gte: new Date(toISODate(selectedDateRangeStartDate)),
+            $lt: new Date(toISODate(selectedDateRangeEndDate)),
+          },
+        },
+      });
+    }
+
+    if (article) {
+      pipeline.push({
+        $match: { article: { $regex: article, $options: "i" } },
+      });
+    }
+
+    if (color) {
+      pipeline.push({
+        $match: { color: { $regex: color, $options: "i" } },
+      });
+    }
+
+    if (size) {
+      pipeline.push({
+        $match: { size: parseInt(size) },
+      });
+    }
+
+    if (soldAt) {
+      pipeline.push({
+        $match: { sold_at: soldAt },
+      });
+    }
+
+    if (paymentPending) {
+      pipeline.push({
+        $match: { payment_status: "PENDING" },
+      });
+    }
+
+    if (returnedInvoice) {
+      pipeline.push({
+        $match: { invoice_status: "RETURNED" },
+      });
+    }
+
+    pipeline.push({ $sort: { invoice_date: -1 } });
+
+    // Run aggregation
+    const invoices = await InvoiceModel.aggregate(pipeline);
+    return invoices;
+
   },
   async updateInvoice(invoice) {
     let oldInvoice = await InvoiceModel.findOne({
@@ -134,22 +223,22 @@ module.exports = {
           pair.quantity++;
           console.log(
             "edit : increasing quantity of " +
-              oldInvoice.article +
-              " : " +
-              oldInvoice.color +
-              " : " +
-              oldInvoice.size
+            oldInvoice.article +
+            " : " +
+            oldInvoice.color +
+            " : " +
+            oldInvoice.size
           );
         }
         if (pair.available_at == invoice.sold_at && pair.size == invoice.size) {
           pair.quantity--;
           console.log(
             "edit : reducing quantity of " +
-              invoice.article +
-              " : " +
-              invoice.color +
-              " : " +
-              invoice.size
+            invoice.article +
+            " : " +
+            invoice.color +
+            " : " +
+            invoice.size
           );
         }
       }
@@ -200,11 +289,11 @@ module.exports = {
           pair.quantity++;
           console.log(
             "return : increasing quantity of " +
-              invoice.article +
-              " : " +
-              invoice.color +
-              " : " +
-              invoice.size
+            invoice.article +
+            " : " +
+            invoice.color +
+            " : " +
+            invoice.size
           );
         }
       }
@@ -229,11 +318,11 @@ module.exports = {
           pair.quantity++;
           console.log(
             "return - completed again : reducing quantity of " +
-              invoice.article +
-              " : " +
-              invoice.color +
-              " : " +
-              invoice.size
+            invoice.article +
+            " : " +
+            invoice.color +
+            " : " +
+            invoice.size
           );
         }
       }
@@ -266,7 +355,7 @@ module.exports = {
           sold_at: invoice.sold_at,
           vendor: invoice.vendor,
           add_in_total_cost: invoice.add_in_total_cost,
-          pending_amount : invoice.pending_amount
+          pending_amount: invoice.pending_amount
         },
       }
     );

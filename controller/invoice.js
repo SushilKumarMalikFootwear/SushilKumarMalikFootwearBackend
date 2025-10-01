@@ -24,7 +24,7 @@ const invoiceController = {
       });
   },
   fetchInvoices(request, response) {
-    let promise = invoiceOperations.fetchInvoices();
+    let promise = invoiceOperations.fetchInvoices(request.body);
     promise
       .then((doc) => {
         response
