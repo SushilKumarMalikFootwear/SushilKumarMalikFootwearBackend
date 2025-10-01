@@ -247,9 +247,9 @@ module.exports = {
           }
         }
       }
-      if (out_of_stock != null || out_of_stock != undefined) {
+      if (filterObject['out_of_stock'] != null || filterObject['out_of_stock'] != undefined) {
         filterAggregatePipeline.push({
-          $match: { out_of_stock: out_of_stock == "true" },
+          $match: { out_of_stock: filterObject['out_of_stock'] == "true" },
         });
       }
       let footwears =

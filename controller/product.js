@@ -49,12 +49,8 @@ const productController = {
   },
   async filter_footwears(request, response) {
     try {
-      let out_of_stock = request.query.out_of_stock;
       let filter = request.body;
-      let footwears = await productOperations.filter_footwears(
-        filter,
-        out_of_stock
-      );
+      let footwears = await productOperations.filter_footwears(filter);
       if (footwears) {
         response.status(SUCCESS).json({
           message: messageBundle["product.found"],
