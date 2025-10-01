@@ -87,7 +87,7 @@ module.exports = {
     }
   },
   async fetchInvoices(filters) {
-    const filterMap = req.body || {};
+    const filterMap = filters || {};
 
     const article = filterMap.article || "";
     const size = filterMap.size || "";
