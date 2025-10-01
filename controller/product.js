@@ -25,7 +25,7 @@ const productController = {
   },
   async apply_changes(request, response) {
     await productOperations.applyChanges();
-    response.status(SUCCESS).json({message : messageBundle['successful']});
+    response.status(SUCCESS).json({ message: messageBundle['successful'] });
   },
   async view_all_products(request, response) {
     try {
@@ -357,6 +357,23 @@ const productController = {
         .json({ message: messageBundle["unsuccessful"], ERROR: err });
     }
   },
+  async get_all_articles(request, response) {
+    try {
+      let articles = await productOperations.get_all_articles();
+      if (articles) {
+        response.status(SUCCESS).json({ "articles": articles });
+      } else {
+        response
+          .status(SERVER_CRASH)
+          .json({ message: messageBundle["unsuccessful"], ERROR: err });
+
+      }
+    } catch (err) {
+      response
+        .status(SERVER_CRASH)
+        .json({ message: messageBundle["unsuccessful"], ERROR: err });
+    }
+  },
   async edit_review(request, response) {
     try {
       let token = request.headers["authorization"];
@@ -453,10 +470,10 @@ const productController = {
         images: request.body.images,
         vendor: request.body.vendor,
         out_of_stock: request.body.out_of_stock,
-        label:request.body.label,
-        rating:request.body.rating,
-        updated: request.body.updated,
-        size_description:request.body.size_description
+        label: request.body.label,
+        rating: request.body.rating,
+        update: request.body.update,
+        size_description: request.body.size_description
       };
       let product = await productOperations.update_product(
         footwear_id,

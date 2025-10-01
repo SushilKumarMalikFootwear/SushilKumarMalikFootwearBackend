@@ -6,115 +6,134 @@ module.exports = {
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
+  async get_all_articles(){
+    let articles = FootwearModel.aggregate(
+      [
+        {
+          "$group": {
+            "_id": null,
+            "uniqueArticles": {"$addToSet": "$article"}
+          }
+        },
+        {
+          "$sort": {"article": 1}
+        },
+        {
+          "$project": {"_id": 0, "uniqueArticles": 1}
+        }
+      ]
+    );
+    return articles;
+  },
   async applyChanges() {
     // code for finging correct trader finances
-    let trader_finances = {
-      "Baba Footwear": {
-        total_cost_price: 227311,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Gupta Footwear": {
-        total_cost_price: 381212,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "R.S. Trading": {
-        total_cost_price: 395587,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Raj Traders": {
-        total_cost_price: 247311,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "S. Kumar": {
-        total_cost_price: 134725,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Relaxo Delhi": {
-        total_cost_price: 5302,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "S. Kumar Neighbour": {
-        total_cost_price: 1360,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "J.K. Enterprise": {
-        total_cost_price: 60874,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "JHA HOSIERY": {
-        total_cost_price: 1900,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Rivaldo Sports": {
-        total_cost_price: 41230,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Sapraa Footwear": {
-        total_cost_price: 75844,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Milap Agencies": {
-        total_cost_price: 8195,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Amir Footwear": {
-        total_cost_price: 14230,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      },
-      "Karol Bagh Vendors": {
-        total_cost_price: 930,
-        cost_price_of_sold: 0,
-        selling_price_of_sold: 0,
-      }
-    };
-    // let update = await InvoiceModel.updateMany(
-    //   {},
-    //   { $set: { pending_amount: 0.0 } }
-    // );
-    // console.log(update);
-    // update = await FootwearModel.updateMany({}, { $set: { rating: 0.0 } });
-    let invoices = await InvoiceModel.find();
-    for (let i = 0; i < invoices.length; i++) {
-      let invoice = invoices[i];
-      if (invoice.invoice_status != "RETURNED") {
-        let trader = trader_finances[invoice.vendor];
-        trader["cost_price_of_sold"] += invoice.cost_price;
-        trader["selling_price_of_sold"] += invoice.selling_price;
-        if (invoice.add_in_total_cost) {
-          trader["total_cost_price"] += invoice.cost_price;
-        }
+    // let trader_finances = {
+    //   "Baba Footwear": {
+    //     total_cost_price: 227311,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Gupta Footwear": {
+    //     total_cost_price: 381212,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "R.S. Trading": {
+    //     total_cost_price: 395587,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Raj Traders": {
+    //     total_cost_price: 247311,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "S. Kumar": {
+    //     total_cost_price: 134725,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Relaxo Delhi": {
+    //     total_cost_price: 5302,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "S. Kumar Neighbour": {
+    //     total_cost_price: 1360,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "J.K. Enterprise": {
+    //     total_cost_price: 60874,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "JHA HOSIERY": {
+    //     total_cost_price: 1900,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Rivaldo Sports": {
+    //     total_cost_price: 41230,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Sapraa Footwear": {
+    //     total_cost_price: 75844,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Milap Agencies": {
+    //     total_cost_price: 8195,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Amir Footwear": {
+    //     total_cost_price: 14230,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   },
+    //   "Karol Bagh Vendors": {
+    //     total_cost_price: 930,
+    //     cost_price_of_sold: 0,
+    //     selling_price_of_sold: 0,
+    //   }
+    // };
+    // // let update = await InvoiceModel.updateMany(
+    // //   {},
+    // //   { $set: { pending_amount: 0.0 } }
+    // // );
+    // // console.log(update);
+    // // update = await FootwearModel.updateMany({}, { $set: { rating: 0.0 } });
+    // let invoices = await InvoiceModel.find();
+    // for (let i = 0; i < invoices.length; i++) {
+    //   let invoice = invoices[i];
+    //   if (invoice.invoice_status != "RETURNED") {
+    //     let trader = trader_finances[invoice.vendor];
+    //     trader["cost_price_of_sold"] += invoice.cost_price;
+    //     trader["selling_price_of_sold"] += invoice.selling_price;
+    //     if (invoice.add_in_total_cost) {
+    //       trader["total_cost_price"] += invoice.cost_price;
+    //     }
 
-      }
-    }
-    console.log(trader_finances);
-    for (const traderName in trader_finances) {
-      if (trader_finances.hasOwnProperty(traderName)) {
-        const update = await TraderFinances.updateOne(
-          { trader_name: traderName },
-          {
-            $set: {
-              total_cost_price: trader_finances[traderName].total_cost_price,
-              cost_price_of_sold: trader_finances[traderName].cost_price_of_sold,
-              selling_price_of_sold: trader_finances[traderName].selling_price_of_sold,
-            },
-          }
-        );
-        console.log(`Updated ${traderName}:`, update);
-      }
-    }
+    //   }
+    // }
+    // console.log(trader_finances);
+    // for (const traderName in trader_finances) {
+    //   if (trader_finances.hasOwnProperty(traderName)) {
+    //     const update = await TraderFinances.updateOne(
+    //       { trader_name: traderName },
+    //       {
+    //         $set: {
+    //           total_cost_price: trader_finances[traderName].total_cost_price,
+    //           cost_price_of_sold: trader_finances[traderName].cost_price_of_sold,
+    //           selling_price_of_sold: trader_finances[traderName].selling_price_of_sold,
+    //         },
+    //       }
+    //     );
+    //     console.log(`Updated ${traderName}:`, update);
+    //   }
+    // }
 
     // code to find -ve pairs in stock
     // let products = await FootwearModel.find();
