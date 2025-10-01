@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const dbOptions = {
     maxPoolSize:5
 }
-mongoose.connect(process.env.DB_URL,dbOptions,err=>{
+mongoose.connect('mongodb+srv://sushilkumarmalikfootwear:sushilkumarmalikfootwear@sushilkumarmalikfootwea.4y2qtto.mongodb.net/',dbOptions,err=>{
     if(err){
         console.log("database connection failed",err);
     }

@@ -29,8 +29,7 @@ const productController = {
   },
   async view_all_products(request, response) {
     try {
-      let out_of_stock = request.query.out_of_stock;
-      let footwears = await productOperations.view_all_products(out_of_stock);
+      let footwears = await productOperations.view_all_products();
       if (footwears) {
         response.status(SUCCESS).json({
           message: messageBundle["product.found"],

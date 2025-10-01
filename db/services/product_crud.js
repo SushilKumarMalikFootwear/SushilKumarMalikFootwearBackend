@@ -180,10 +180,9 @@ module.exports = {
     //   }
     // }
   },
-  async view_all_products(out_of_stock) {
+  async view_all_products() {
     try {
       let footwears = await FootwearModel.find({
-        out_of_stock: out_of_stock,
       }).sort({ _id: -1 });
       if (footwears.length != 0) {
         return footwears;
