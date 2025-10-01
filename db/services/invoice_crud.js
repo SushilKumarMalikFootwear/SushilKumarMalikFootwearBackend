@@ -97,13 +97,16 @@ module.exports = {
     const paymentPending = filterMap.paymentPending === true;
     const returnedInvoice = filterMap.returnedInvoice === true;
 
-    const selectedDateRangeStartDate =
-      filterMap.selectedDateRangeStartDate ||
-      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days back
-    const selectedDateRangeEndDate =
-      filterMap.selectedDateRangeEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // normalize date range inputs
+    const selectedDateRangeStartDate = filterMap.selectedDateRangeStartDate
+      ? new Date(filterMap.selectedDateRangeStartDate)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default: 30 days ago
 
-    // Parse date if provided
+    const selectedDateRangeEndDate = filterMap.selectedDateRangeEndDate
+      ? new Date(filterMap.selectedDateRangeEndDate)
+      : new Date(Date.now() + 24 * 60 * 60 * 1000); // default: tomorrow
+
+    // parse single date filter if provided
     let dateFilter = null;
     if (date) {
       try {
@@ -120,8 +123,8 @@ module.exports = {
       pipeline.push({
         $match: {
           invoice_date: {
-            $gte: new Date(toISODate(dateFilter)),
-            $lt: new Date(toISODate(new Date(dateFilter).setDate(dateFilter.getDate() + 1))),
+            $gte: dateFilter,
+            $lt: new Date(dateFilter.getTime() + 24 * 60 * 60 * 1000), // next day
           },
         },
       });
@@ -129,8 +132,8 @@ module.exports = {
       pipeline.push({
         $match: {
           invoice_date: {
-            $gte: new Date(toISODate(selectedDateRangeStartDate)),
-            $lt: new Date(toISODate(selectedDateRangeEndDate)),
+            $gte: selectedDateRangeStartDate,
+            $lt: selectedDateRangeEndDate,
           },
         },
       });
@@ -177,8 +180,8 @@ module.exports = {
     // Run aggregation
     const invoices = await InvoiceModel.aggregate(pipeline);
     return invoices;
-
   },
+
   async updateInvoice(invoice) {
     let oldInvoice = await InvoiceModel.findOne({
       invoice_no: invoice.invoice_no,
