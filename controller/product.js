@@ -374,6 +374,23 @@ const productController = {
         .json({ message: messageBundle["unsuccessful"], ERROR: err });
     }
   },
+  async get_all_labels(request, response) {
+    try {
+      let labels = await productOperations.get_all_labels();
+      if (labels) {
+        response.status(SUCCESS).json({ "labels": labels });
+      } else {
+        response
+          .status(SERVER_CRASH)
+          .json({ message: messageBundle["unsuccessful"], ERROR: err });
+
+      }
+    } catch (err) {
+      response
+        .status(SERVER_CRASH)
+        .json({ message: messageBundle["unsuccessful"], ERROR: err });
+    }
+  },
   async edit_review(request, response) {
     try {
       let token = request.headers["authorization"];

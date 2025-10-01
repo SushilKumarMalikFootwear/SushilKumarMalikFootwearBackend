@@ -6,24 +6,41 @@ module.exports = {
     let promise = FootwearModel.create(footwearObject);
     return promise;
   },
-  async get_all_articles(){
+  async get_all_articles() {
     let articles = FootwearModel.aggregate(
       [
         {
           "$group": {
             "_id": null,
-            "uniqueArticles": {"$addToSet": "$article"}
+            "uniqueArticles": { "$addToSet": "$article" }
           }
         },
         {
-          "$sort": {"article": 1}
+          "$sort": { "article": 1 }
         },
         {
-          "$project": {"_id": 0, "uniqueArticles": 1}
+          "$project": { "_id": 0, "uniqueArticles": 1 }
         }
       ]
     );
     return articles;
+  },
+  async get_all_labels() {
+    let labels = FootwearModel.aggregate([
+      {
+        "$group": {
+          "_id": null,
+          "uniqueLables": { "$addToSet": "$label" }
+        }
+      },
+      {
+        "$sort": { "label": 1 }
+      },
+      {
+        "$project": { "_id": 0, "uniqueLables": 1 }
+      }
+    ]);
+    return labels;
   },
   async applyChanges() {
     // code for finging correct trader finances

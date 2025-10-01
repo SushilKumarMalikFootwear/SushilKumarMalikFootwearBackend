@@ -41,6 +41,7 @@ module.exports = {
             VIEW_BY_PRICE_CATEGORIES:'/view_by_price_categories',
             VIEW_BY_FOOTWEAR_ID:'/view_by_footwear_id',
             GET_ALL_ARTICLES:'/get_all_articles',
+            GET_ALL_LABELS:'/get_all_labels',
             VIEW_ALL_REVIEWS:'/view_all_reviews',
             SEARCH_IN_REVIEWS:'/search_in_reviews',
             RATE_PRODUCT:'/rate_product',
