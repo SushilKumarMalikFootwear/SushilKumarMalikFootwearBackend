@@ -242,16 +242,7 @@ module.exports = {
       // ✅ also return total count for frontend pagination
       const totalCount = await FootwearModel.countDocuments();
 
-      return {
-        data: footwears,
-        pagination: {
-          page,
-          limit,
-          totalCount,
-          totalPages: Math.ceil(totalCount / limit),
-        },
-      };
-
+      return footwears;
     } catch (err) {
       console.log("ERROR is : ", err);
       return null;
