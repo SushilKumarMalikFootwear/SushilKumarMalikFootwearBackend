@@ -94,8 +94,8 @@ module.exports = {
     const color = filterMap.color || "";
     const date = filterMap.date || "";
     const soldAt = filterMap.soldAt || "";
-    const paymentPending = filterMap.paymentPending === true;
-    const returnedInvoice = filterMap.returnedInvoice === true;
+    const paymentPending = filterMap.paymentPending === 'true';
+    const returnedInvoice = filterMap.returnedInvoice === 'true';
 
     // normalize date range inputs
     const selectedDateRangeStartDate = filterMap.selectedDateRangeStartDate
@@ -168,7 +168,6 @@ module.exports = {
         $match: { payment_status: "PENDING" },
       });
     }
-
     if (returnedInvoice) {
       pipeline.push({
         $match: { invoice_status: "RETURNED" },
