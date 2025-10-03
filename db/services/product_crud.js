@@ -194,73 +194,64 @@ module.exports = {
       return null;
     }
   },
-  async filter_footwears(filterObject, out_of_stock) {
+  async filter_footwears(filterObject) {
     try {
       let filterAggregatePipeline = [];
-      let filter_by_brand = (brand) => {
-        return {
-          $match: { brand: { $regex: brand, $options: "i" } },
-        };
-      };
-      let filter_by_category = (category) => {
-        return {
-          $match: { category: { $regex: category, $options: "i" } },
-        };
-      };
-      let filter_by_article = (article) => {
-        return {
-          $match: { article: { $regex: article, $options: "i" } },
-        };
-      };
-      let filter_by_size_range = (size_range) => {
-        return {
-          $match: { size_range: { $regex: size_range, $options: "i" } },
-        };
-      };
-      let filter_by_color = (color) => {
-        return {
-          $match: { color: { $regex: color, $options: "i" } },
-        };
-      };
-      let filter_by_vendor = (vendor) => {
-        return {
-          $match: { vendor: { $regex: vendor, $options: "i" } },
-        };
-      };
-      for (key in filterObject) {
+
+      let filter_by_brand = (brand) => ({ $match: { brand: { $regex: brand, $options: "i" } } });
+      let filter_by_category = (category) => ({ $match: { category: { $regex: category, $options: "i" } } });
+      let filter_by_article = (article) => ({ $match: { article: { $regex: article, $options: "i" } } });
+      let filter_by_size_range = (size_range) => ({ $match: { size_range: { $regex: size_range, $options: "i" } } });
+      let filter_by_color = (color) => ({ $match: { color: { $regex: color, $options: "i" } } });
+      let filter_by_vendor = (vendor) => ({ $match: { vendor: { $regex: vendor, $options: "i" } } });
+
+      for (let key in filterObject) {
         if (filterObject[key] != "") {
-          if (key == "brand") {
-            filterAggregatePipeline.push(filter_by_brand(filterObject[key]));
-          } else if (key == "category") {
-            filterAggregatePipeline.push(filter_by_category(filterObject[key]));
-          } else if (key == "article") {
-            filterAggregatePipeline.push(filter_by_article(filterObject[key]));
-          } else if (key == "size_range") {
-            filterAggregatePipeline.push(
-              filter_by_size_range(filterObject[key])
-            );
-          } else if (key == "color") {
-            filterAggregatePipeline.push(filter_by_color(filterObject[key]));
-          } else if (key == "vendor") {
-            filterAggregatePipeline.push(filter_by_vendor(filterObject[key]));
-          }
+          if (key == "brand") filterAggregatePipeline.push(filter_by_brand(filterObject[key]));
+          else if (key == "category") filterAggregatePipeline.push(filter_by_category(filterObject[key]));
+          else if (key == "article") filterAggregatePipeline.push(filter_by_article(filterObject[key]));
+          else if (key == "size_range") filterAggregatePipeline.push(filter_by_size_range(filterObject[key]));
+          else if (key == "color") filterAggregatePipeline.push(filter_by_color(filterObject[key]));
+          else if (key == "vendor") filterAggregatePipeline.push(filter_by_vendor(filterObject[key]));
         }
       }
-      if (filterObject['out_of_stock'] != null || filterObject['out_of_stock'] != undefined) {
+
+      // Out of stock filter
+      if (filterObject['out_of_stock'] != null && filterObject['out_of_stock'] != undefined) {
         filterAggregatePipeline.push({
           $match: { out_of_stock: filterObject['out_of_stock'] == "true" },
         });
       }
+
+      // Sort newest first
       filterAggregatePipeline.push({ $sort: { _id: -1 } });
+
+      // ✅ Pagination
+      const page = parseInt(filterObject.page) > 0 ? parseInt(filterObject.page) : 1;
+      const limit = parseInt(filterObject.limit) > 0 ? parseInt(filterObject.limit) : 50;
+      const skip = (page - 1) * limit;
+
+      filterAggregatePipeline.push({ $skip: skip });
+      filterAggregatePipeline.push({ $limit: limit });
+
       let footwears =
         filterAggregatePipeline.length == 0
-          ? await FootwearModel.find().sort({ _id: -1 })
+          ? await FootwearModel.find().sort({ _id: -1 }).skip(skip).limit(limit)
           : await FootwearModel.aggregate(filterAggregatePipeline);
-      if (footwears.length != 0) {
-        return footwears;
-      } else {
-        return [];
-      }
+
+      // ✅ also return total count for frontend pagination
+      const totalCount = await FootwearModel.countDocuments();
+
+      return {
+        data: footwears,
+        pagination: {
+          page,
+          limit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+        },
+      };
+
     } catch (err) {
       console.log("ERROR is : ", err);
       return null;
