@@ -251,6 +251,7 @@ module.exports = {
           $match: { out_of_stock: filterObject['out_of_stock'] == "true" },
         });
       }
+      filterAggregatePipeline.push({ $sort: { _id: -1 } });
       let footwears =
         filterAggregatePipeline.length == 0
           ? await FootwearModel.find().sort({ _id: -1 })
