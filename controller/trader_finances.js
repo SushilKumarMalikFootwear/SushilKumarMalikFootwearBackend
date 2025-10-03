@@ -4,7 +4,7 @@ const TraderFinancesOperations = require("../db/services/trader_finances");
 const configListsController = {
     async getTraderFinances(request, response) {
         let traderFinances = await TraderFinancesOperations.getTraderFinances();
-        if (configLists) {
+        if (traderFinances) {
             response.status(SUCCESS).json(traderFinances);
         }
         else {
