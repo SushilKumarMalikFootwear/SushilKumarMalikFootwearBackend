@@ -24,6 +24,10 @@ module.exports = {
             FETCH_INVOICES:'/fetchInvoices',
             MONTHLY_SALES_REPORT:'/monthlySalesReport'
         },
+        TRADER_FINANCES:{
+            GET_TRADER_FINANCES:'/get_trader_finances',
+            UPDATE_TOTAL_COST_PRICE:'/update_total_cost_price'
+        },
         PRODUCT:{
             addFootwear:'/add_footwear',
             applyChanges:'/applyChanges',

@@ -1,5 +1,9 @@
 const TraderFinances = require("../models/tarder_finances");
 module.exports = {
+  async getTraderFinances(){
+    let traderFinances = await TraderFinances.find();
+    return traderFinances;
+  },
   async updateCostPriceOfSold(traderName, costPrice) {
     let update = TraderFinances.updateOne(
       { trader_name: traderName },
