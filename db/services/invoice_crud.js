@@ -2,11 +2,13 @@ const InvoiceModel = require("../models/invoice");
 const productOperations = require("./product_crud");
 const traderFinancesOperation = require("./trader_finances");
 module.exports = {
-  async save_invoice(invoice, isOldInvoice) {
+  async save_invoice(invoice) {
     invoice.invoice_no = await this.getNextInvoiceNumber(invoice.invoice_date);
     if (invoice.product_id) {
       let product = await productOperations.view_by_product_id(invoice.product_id);
+      product = product[0];
       let sold_at = invoice.sold_at;
+      console.log(product);
       let size = invoice.size;
       for (let i = 0; i < product["pairs_in_stock"].length; i++) {
         let pair = product["pairs_in_stock"][i];
@@ -17,10 +19,8 @@ module.exports = {
           );
         }
       }
-      if (isOldInvoice != "true") {
-        console.log("updating quantity");
-        await productOperations.update_product(invoice.product_id, product);
-      }
+      console.log("updating quantity");
+      await productOperations.update_product(invoice.product_id, product);
     }
     if (invoice.add_in_total_cost == true) {
       console.log("updating total cost");
