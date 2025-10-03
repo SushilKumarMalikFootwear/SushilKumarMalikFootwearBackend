@@ -187,7 +187,8 @@ module.exports = {
     });
     console.log("old invoice - ", oldInvoice);
     console.log("received invoice - ", invoice);
-    let product = await productOperations.view_by_id(invoice.product_id);
+    let product = await productOperations.view_by_product_id(invoice.product_id);
+    product = product[0];
     if (oldInvoice.add_in_total_cost && !invoice.add_in_total_cost) {
       await traderFinancesOperation.updateTotalCostPrice(
         invoice.vendor,
