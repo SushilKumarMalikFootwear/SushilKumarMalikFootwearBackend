@@ -1,6 +1,6 @@
 const { SUCCESS, SERVER_CRASH, NOT_FOUND } = require('../utils/config').STATUS_CODES;
 const messageBundle = require('../locales/en');
-const TraderFinancesOperations = require("../db/services/trader_finances");
+const TraderFinancesLogsOperations = require("../db/services/trader_finances_logs");
 
 const traderFinancesLogsController = {
 
@@ -9,7 +9,7 @@ const traderFinancesLogsController = {
    */
   async getPendingBills(request, response) {
     try {
-      const result = await TraderFinancesOperations.getPendingBills();
+      const result = await TraderFinancesLogsOperations.getPendingBills();
 
       if (result && result.length > 0) {
         response.status(SUCCESS).json(result);
@@ -33,7 +33,7 @@ const traderFinancesLogsController = {
   async saveTraderFinanceLog(request, response) {
     try {
       const payload = request.body;
-      const savedLog = await TraderFinancesOperations.saveTraderFinanceLog(payload);
+      const savedLog = await TraderFinancesLogsOperations.saveTraderFinanceLog(payload);
 
       if (savedLog) {
         response.status(SUCCESS).json(savedLog);
@@ -57,7 +57,7 @@ const traderFinancesLogsController = {
   async decreasePendingAmountById(request, response) {
     try {
       const { id, amount } = request.body;
-      const updatedDoc = await TraderFinancesOperations.decreasePendingAmountById(id, amount);
+      const updatedDoc = await TraderFinancesLogsOperations.decreasePendingAmountById(id, amount);
 
       if (updatedDoc) {
         response.status(SUCCESS).json(updatedDoc);
@@ -81,7 +81,7 @@ const traderFinancesLogsController = {
   async getLastRunningPendingPayment(request, response) {
     try {
       const { trader_name } = request.query;
-      const result = await TraderFinancesOperations.getLastRunningPendingPayment(trader_name);
+      const result = await TraderFinancesLogsOperations.getLastRunningPendingPayment(trader_name);
 
       if (result) {
         response.status(SUCCESS).json(result);
@@ -105,7 +105,7 @@ const traderFinancesLogsController = {
   async getFilteredTraderFinanceLogs(request, response) {
     try {
       const filterMap = request.body;
-      const logs = await TraderFinancesOperations.getFilteredTraderFinanceLogs(filterMap);
+      const logs = await TraderFinancesLogsOperations.getFilteredTraderFinanceLogs(filterMap);
 
       if (logs && logs.length > 0) {
         response.status(SUCCESS).json(logs);
@@ -128,7 +128,7 @@ const traderFinancesLogsController = {
    */
   async getTraderWisePendingPayments(request, response) {
     try {
-      const result = await TraderFinancesOperations.getTraderWisePendingPayments();
+      const result = await TraderFinancesLogsOperations.getTraderWisePendingPayments();
 
       if (result && Object.keys(result).length > 0) {
         response.status(SUCCESS).json(result);
