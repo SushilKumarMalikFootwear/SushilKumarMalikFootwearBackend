@@ -12,18 +12,19 @@ app.use(cors()); //using cors
 
 //ROUTES AVAILABLE BEFORE ANY LOGIN     (basically these routes dont require token in headers/authorization)
 app.use(ROOT, require("./api/routes/config_lists"));
-app.use(ROOT, require("./api/routes/view_products")); 
-app.use(ROOT, require("./api/routes/invoice")); 
-app.use(ROOT, require("./api/routes/trader_finances")); 
-app.use(ROOT, require("./api/routes/product_crud")); //add a product, update product details, delete a product.
+app.use(ROOT, require("./api/routes/view_products"));
+app.use(ROOT, require("./api/routes/invoice"));
+app.use(ROOT, require("./api/routes/trader_finances"));
+app.use(ROOT, require("./api/routes/product_crud"));
+app.use(ROOT, require("./api/routes/trader_finances_logs"));
 
-// const server = app.listen(process.env.PORT || 1234, (err) => {
-//   //.listen up the our application on that port in local host this port number should be unique , should not get conflict with other apps
-//   if (err) {
-//     console.log("app crash", err);
-//   } else {
-//     console.log("server started...", server.address().port); //server.address().port tells on which port our application is running
-//   }
-// });
-module.exports = app;
+const server = app.listen(process.env.PORT || 1234, (err) => {
+  //.listen up the our application on that port in local host this port number should be unique , should not get conflict with other apps
+  if (err) {
+    console.log("app crash", err);
+  } else {
+    console.log("server started...", server.address().port); //server.address().port tells on which port our application is running
+  }
+});
+// module.exports = app;
 
