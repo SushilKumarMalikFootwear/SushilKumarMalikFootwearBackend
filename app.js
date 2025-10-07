@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express(); //call express function and it returns app function
 //it creates a new app for our application
 const cors = require("cors"); //to expose our backend application, so that front end on any other system can use it
@@ -8,7 +9,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // Default route
 app.get("/", (req, res) => {
 	res.sendFile(path.join(__dirname, "public", "index.html"));
-});app.use(express.json()); //for reading json format data key:value
+});
+app.use(express.json()); //for reading json format data key:value
 app.use(express.urlencoded()); //for reading key=value&key=value
 const { ROOT } = require("./utils/config").ROUTES;
 app.use(cors()); //using cors
@@ -32,4 +34,3 @@ app.use(ROOT, require("./api/routes/trader_finances_logs"));
 //   }
 // });
 module.exports = app;
-
