@@ -25,6 +25,9 @@ app.use(ROOT, require("./api/routes/invoice"));
 app.use(ROOT, require("./api/routes/trader_finances"));
 app.use(ROOT, require("./api/routes/product_crud"));
 app.use(ROOT, require("./api/routes/trader_finances_logs"));
-
+	const PORT = process.env.PORT || 3000;
+	app.listen(PORT, () => {
+		console.log(`✅ Server running locally on http://localhost:${PORT}`);
+	});
 // Export app for both local + Vercel use
 module.exports = app;

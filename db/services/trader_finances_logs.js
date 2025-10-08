@@ -25,7 +25,7 @@ module.exports = {
             trader_name: traderName,
             "type": { "$in": ["PURCHASE", "PAYMENT"] },
         }).sort({ date: -1 }).limit(1);
-        return doc.running_pending_payment;
+        return doc[0].running_pending_payment;
     },
     async getFilteredTraderFinanceLogs(filterMap) {
         try {
@@ -42,6 +42,12 @@ module.exports = {
 
             if (fromDate || toDate) {
                 filter.date = {};
+
+                const toUtcDate = (dateStr) => {
+                    const [datePart, timePart] = dateStr.split(' ');
+                    return new Date(`${datePart}T${timePart}`);
+                };
+
                 if (fromDate) {
                     filter.date.$gte = new Date(fromDate);
                 }
@@ -51,9 +57,8 @@ module.exports = {
             }
 
             const logs = await TraderFinanesLogs.find(filter)
-                .sort({ date: -1 }) 
+                .sort({ date: -1 })
                 .limit(100);
-
             return logs;
         } catch (error) {
             console.error("Error fetching trader finance logs:", error);
