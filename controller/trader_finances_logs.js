@@ -56,8 +56,8 @@ const traderFinancesLogsController = {
    */
   async decreasePendingAmountById(request, response) {
     try {
-      const { id, amount } = request.body;
-      const updatedDoc = await TraderFinancesLogsOperations.decreasePendingAmountById(id, amount);
+      const { id, newPendingAmount } = request.body;
+      const updatedDoc = await TraderFinancesLogsOperations.decreasePendingAmountById(id, newPendingAmount);
 
       if (updatedDoc) {
         response.status(SUCCESS).json(updatedDoc);

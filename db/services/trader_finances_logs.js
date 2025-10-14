@@ -18,6 +18,7 @@ module.exports = {
 
             }
         });
+        console.log(update)
         return update;
     },
     async getLastRunningPendingPayment(traderName) {
