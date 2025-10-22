@@ -58,8 +58,7 @@ module.exports = {
             }
 
             const logs = await TraderFinanesLogs.find(filter)
-                .sort({ date: -1 })
-                .limit(100);
+                .sort({ date: -1 });
             return logs;
         } catch (error) {
             console.error("Error fetching trader finance logs:", error);
