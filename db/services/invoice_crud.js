@@ -365,90 +365,111 @@ module.exports = {
     return invoice;
   },
   async getMonthlySalesReport() {
-    let salesData = await InvoiceModel.aggregate([
-      {
-        $match: {
-          invoice_status: "COMPLETED",
-        },
-      },
-      {
-        $group: {
-          _id: {
-            month: {
-              $dateToString: { format: "%Y-%m", date: "$invoice_date" },
+    try {
+      const salesData = await InvoiceModel.aggregate([
+        // 🧩 Step 1: Separate normal and returned invoices
+        {
+          $group: {
+            _id: {
+              month: { $dateToString: { format: "%Y-%m", date: "$invoice_date" } },
+              place: "$sold_at",
+              day: { $dateToString: { format: "%Y-%m-%d", date: "$invoice_date" } },
             },
-            place: "$sold_at",
-            day: {
-              $dateToString: { format: "%Y-%m-%d", date: "$invoice_date" },
-            }, // Extract unique day
-          },
-          totalSP: { $sum: "$selling_price" },
-          totalProfit: { $sum: "$profit" },
-          totalInvoices: { $sum: 1 },
-        },
-      },
-      {
-        $group: {
-          _id: { month: "$_id.month", place: "$_id.place" },
-          totalSP: { $sum: "$totalSP" },
-          totalProfit: { $sum: "$totalProfit" },
-          totalInvoices: { $sum: "$totalInvoices" },
-          uniqueDays: { $addToSet: "$_id.day" }, // Collect unique days in a set
-        },
-      },
-      {
-        $addFields: {
-          numDays: { $size: "$uniqueDays" }, // Count unique days
-          dailyAvgSales: {
-            $round: [
-              {
-                $cond: {
-                  if: { $gt: [{ $size: "$uniqueDays" }, 0] },
-                  then: { $divide: ["$totalSP", { $size: "$uniqueDays" }] },
-                  else: 0,
-                },
+            // Exclude RETURNED invoices from totals
+            totalSP: {
+              $sum: {
+                $cond: [{ $ne: ["$invoice_status", "RETURNED"] }, "$selling_price", 0],
               },
-              0, // Round to nearest integer
-            ],
-          },
-          dailyAvgInvoices: {
-            $round: [
-              {
-                $cond: {
-                  if: { $gt: [{ $size: "$uniqueDays" }, 0] },
-                  then: {
-                    $divide: ["$totalInvoices", { $size: "$uniqueDays" }],
-                  },
-                  else: 0,
-                },
+            },
+            totalProfit: {
+              $sum: {
+                $cond: [{ $ne: ["$invoice_status", "RETURNED"] }, "$profit", 0],
               },
-              0, // Round to nearest integer
-            ],
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$_id.month",
-          sales: {
-            $push: {
-              place: "$_id.place",
-              totalSP: "$totalSP",
-              totalProfit: "$totalProfit",
-              totalInvoices: "$totalInvoices",
-              numDays: "$numDays",
-              dailyAvgSales: "$dailyAvgSales",
-              dailyAvgInvoices: "$dailyAvgInvoices",
+            },
+            totalInvoices: {
+              $sum: {
+                $cond: [{ $ne: ["$invoice_status", "RETURNED"] }, 1, 0],
+              },
+            },
+            returnedInvoices: {
+              $sum: {
+                $cond: [{ $eq: ["$invoice_status", "RETURNED"] }, 1, 0],
+              },
             },
           },
         },
-      },
-      {
-        $sort: { _id: 1 }, // Sort by month
-      },
-    ]);
 
-    console.log(salesData);
-    return salesData;
-  },
+        // 🧩 Step 2: Group again by month + place
+        {
+          $group: {
+            _id: { month: "$_id.month", place: "$_id.place" },
+            totalSP: { $sum: "$totalSP" },
+            totalProfit: { $sum: "$totalProfit" },
+            totalInvoices: { $sum: "$totalInvoices" },
+            returnedInvoices: { $sum: "$returnedInvoices" },
+            uniqueDays: { $addToSet: "$_id.day" },
+          },
+        },
+
+        // 🧮 Step 3: Add computed fields
+        {
+          $addFields: {
+            numDays: { $size: "$uniqueDays" },
+            dailyAvgSales: {
+              $round: [
+                {
+                  $cond: {
+                    if: { $gt: [{ $size: "$uniqueDays" }, 0] },
+                    then: { $divide: ["$totalSP", { $size: "$uniqueDays" }] },
+                    else: 0,
+                  },
+                },
+                0,
+              ],
+            },
+            dailyAvgInvoices: {
+              $round: [
+                {
+                  $cond: {
+                    if: { $gt: [{ $size: "$uniqueDays" }, 0] },
+                    then: { $divide: ["$totalInvoices", { $size: "$uniqueDays" }] },
+                    else: 0,
+                  },
+                },
+                0,
+              ],
+            },
+          },
+        },
+
+        // 📦 Step 4: Group by month for final structure
+        {
+          $group: {
+            _id: "$_id.month",
+            sales: {
+              $push: {
+                place: "$_id.place",
+                totalSP: "$totalSP",
+                totalProfit: "$totalProfit",
+                totalInvoices: "$totalInvoices",
+                returnedInvoices: "$returnedInvoices",
+                numDays: "$numDays",
+                dailyAvgSales: "$dailyAvgSales",
+                dailyAvgInvoices: "$dailyAvgInvoices",
+              },
+            },
+          },
+        },
+
+        // 📅 Step 5: Sort by month ascending
+        { $sort: { _id: 1 } },
+      ]);
+
+      return salesData;
+    } catch (error) {
+      console.error("Error in getMonthlySalesReport:", error);
+      throw error;
+    }
+  }
+
 };

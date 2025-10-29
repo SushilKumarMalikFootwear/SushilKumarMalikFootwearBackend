@@ -6,5 +6,5 @@ const { FETCH_INVOICES, SAVE_INVOICE, UPDATE_INVOICE , MONTHLY_SALES_REPORT} =
 router.post(SAVE_INVOICE, add);
 router.post(UPDATE_INVOICE, update);
 router.post(FETCH_INVOICES, fetchInvoices);
-router.post(MONTHLY_SALES_REPORT,monthlySalesReport);
+router.get(MONTHLY_SALES_REPORT,monthlySalesReport);
 module.exports = router;
