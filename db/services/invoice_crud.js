@@ -476,7 +476,7 @@ module.exports = {
     try {
       let pipeline = [];
 
-      if (label && label.trim() !== "") {
+      if (article && article.trim() !== "") {
         pipeline.push({
           $match: {
             article: { $regex: article, $options: "i" },
@@ -484,14 +484,12 @@ module.exports = {
         });
       }
 
-      if (article && article.trim() !== "") {
+      if (label && label.trim() !== "") {
         pipeline.push({
-          $match: { article: article },
+          $match: { label: label },
         });
       }
-
       const footwears = await FootwearModel.aggregate(pipeline);
-
       if (!footwears.length) {
         return {};
       }
@@ -507,8 +505,8 @@ module.exports = {
           $match: {
             product_id: { $in: footwearIds },
             invoice_date: {
-              $gte: (new Date(startDate)).toISOString(),
-              $lt: (new Date(endDate)).toISOString(),
+              $gte: new Date(startDate),
+              $lt: new Date(endDate),
             },
             invoice_status: "COMPLETED",
           },
@@ -516,7 +514,6 @@ module.exports = {
       ];
 
       const invoices = await InvoiceModel.aggregate(invoicePipeline);
-
       if (!invoices.length) {
         return {};
       }

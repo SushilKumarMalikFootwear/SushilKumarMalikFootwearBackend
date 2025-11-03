@@ -54,7 +54,7 @@ const invoiceController = {
         });
       });
   },
-  monthlySalesReport(request, response){
+  monthlySalesReport(request, response) {
     let promise = invoiceOperations.getMonthlySalesReport();
     promise
       .then((doc) => {
@@ -71,10 +71,11 @@ const invoiceController = {
   },
   async getInvoicesForSizesSalesReport(req, res) {
     try {
-      const { article, startDate, endDate, label } = req.body;
-
+      const article = req.body.article;
+      const startDate = req.body.startDate;
+      const endDate = req.body.endDate;
+      const label = req.body.label;
       const data = await invoiceOperations.getInvoicesForSizesSalesReport(article, startDate, endDate, label);
-
       if (Object.keys(data).length > 0) {
         res.status(SUCCESS).json(data);
       } else {
