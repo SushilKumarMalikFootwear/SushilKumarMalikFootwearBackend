@@ -1,3 +1,4 @@
+const FootwearModel = require("../models/footwear");
 const InvoiceModel = require("../models/invoice");
 const productOperations = require("./product_crud");
 const traderFinancesOperation = require("./trader_finances");
@@ -470,6 +471,111 @@ module.exports = {
       console.error("Error in getMonthlySalesReport:", error);
       throw error;
     }
-  }
+  },
+  formatToIso8601WithTimezone(date) {
+    const isoString = new Date(date).toISOString();
+    return isoString;
+  },
 
+  async getInvoicesForSizesSalesReport(article, startDate, endDate, label) {
+    try {
+      let pipeline = [];
+
+      if (label && label.trim() !== "") {
+        pipeline.push({
+          $match: {
+            article: { $regex: article, $options: "i" },
+          },
+        });
+      }
+
+      if (article && article.trim() !== "") {
+        pipeline.push({
+          $match: { article: article },
+        });
+      }
+
+      const footwears = await FootwearModel.aggregate(pipeline);
+
+      if (!footwears.length) {
+        return {};
+      }
+
+      const sizeSet = [];
+      const footwearIds = footwears.map((f) => {
+        sizeSet.push(f.size_range);
+        return f.footwear_id.toString();
+      });
+
+      const invoicePipeline = [
+        {
+          $match: {
+            product_id: { $in: footwearIds },
+            invoice_date: {
+              $gte: new Date(formatToIso8601WithTimezone(startDate)),
+              $lt: new Date(formatToIso8601WithTimezone(endDate)),
+            },
+            invoice_status: "COMPLETED",
+          },
+        },
+      ];
+
+      const invoices = await InvoiceModel.aggregate(invoicePipeline);
+
+      if (!invoices.length) {
+        return {};
+      }
+
+      const report = {};
+      const productMap = {};
+      const dataMap = {
+        report,
+        total_count: invoices.length,
+        cost_price: 0,
+        selling_price: 0,
+        profit: 0,
+      };
+
+      const extractSizes = (range, sizeDescription) => {
+        const sizeGroups = range.split("-");
+        for (let group of sizeGroups) {
+          const parts = group.split("X").map(Number);
+          for (let i = parts[0]; i <= parts[1]; i++) {
+            if (sizeDescription === "S") {
+              report[`${i}K`] = 0;
+            } else {
+              report[`${i}`] = 0;
+            }
+          }
+        }
+      };
+
+      for (const product of footwears) {
+        productMap[product.footwear_id] = product;
+        const range = product.size_range;
+        const sizeDescription = product.size_description || "";
+        extractSizes(range, sizeDescription);
+      }
+
+      for (const invoice of invoices) {
+        let sizeKey = invoice.size.toString();
+        const sizeDescription =
+          productMap[invoice.product_id]?.size_description?.toString() || "";
+
+        if (sizeDescription === "S") {
+          sizeKey = `${sizeKey}K`;
+        }
+
+        report[sizeKey] = (report[sizeKey] || 0) + 1;
+        dataMap.cost_price += invoice.cost_price || 0;
+        dataMap.selling_price += invoice.selling_price || 0;
+        dataMap.profit += invoice.profit || 0;
+      }
+
+      return dataMap;
+    } catch (error) {
+      console.error("Error in getInvoicesForSizesSalesReport:", error);
+      throw error;
+    }
+  }
 };

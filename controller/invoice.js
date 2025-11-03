@@ -68,6 +68,25 @@ const invoiceController = {
           ERROR: err.toString(),
         });
       });
+  },
+  async getInvoicesForSizesSalesReport(req, res) {
+    try {
+      const { article, startDate, endDate, label } = req.body;
+
+      const data = await invoiceOperations.getInvoicesForSizesSalesReport(article, startDate, endDate, label);
+
+      if (Object.keys(data).length > 0) {
+        res.status(SUCCESS).json(data);
+      } else {
+        res.status(NOT_FOUND).json({ message: messageBundle["unsuccessful"] });
+      }
+    } catch (error) {
+      console.error("Error in getInvoicesForSizesSalesReport controller:", error);
+      res.status(SERVER_CRASH).json({
+        message: messageBundle["server.crash"],
+        error: error.message,
+      });
+    }
   }
 };
 module.exports = invoiceController;

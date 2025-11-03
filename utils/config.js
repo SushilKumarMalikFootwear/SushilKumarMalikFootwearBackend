@@ -22,7 +22,8 @@ module.exports = {
             SAVE_INVOICE: '/saveInvoice',
             UPDATE_INVOICE: '/updateInvoice',
             FETCH_INVOICES: '/fetchInvoices',
-            MONTHLY_SALES_REPORT: '/monthlySalesReport'
+            MONTHLY_SALES_REPORT: '/monthlySalesReport',
+            FETCH_SIZES_SALES_REPORT: '/fetchSizesSalesReport'
         },
         TRADER_FINANCES: {
             GET_TRADER_FINANCES: '/get_trader_finances',
