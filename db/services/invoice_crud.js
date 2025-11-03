@@ -472,11 +472,6 @@ module.exports = {
       throw error;
     }
   },
-  formatToIso8601WithTimezone(date) {
-    const isoString = new Date(date).toISOString();
-    return isoString;
-  },
-
   async getInvoicesForSizesSalesReport(article, startDate, endDate, label) {
     try {
       let pipeline = [];
@@ -512,8 +507,8 @@ module.exports = {
           $match: {
             product_id: { $in: footwearIds },
             invoice_date: {
-              $gte: new Date(formatToIso8601WithTimezone(startDate)),
-              $lt: new Date(formatToIso8601WithTimezone(endDate)),
+              $gte: (new Date(startDate)).toISOString(),
+              $lt: (new Date(endDate)).toISOString(),
             },
             invoice_status: "COMPLETED",
           },
