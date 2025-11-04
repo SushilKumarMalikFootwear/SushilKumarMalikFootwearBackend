@@ -534,9 +534,9 @@ module.exports = {
           const parts = group.split("X").map(Number);
           for (let i = parts[0]; i <= parts[1]; i++) {
             if (sizeDescription === "S") {
-              report[`${i}K`] = {"count":0,"sizzeDescription":sizeDescription};
+              report[`${i}K`] = {"count":0,"sizeDescription":sizeDescription};
             } else {
-              report[`${i}`] = {"count":0,"sizzeDescription":sizeDescription};
+              report[`${i}`] = {"count":0,"sizeDescription":sizeDescription};
             }
           }
         }
