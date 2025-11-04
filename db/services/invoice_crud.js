@@ -534,9 +534,9 @@ module.exports = {
           const parts = group.split("X").map(Number);
           for (let i = parts[0]; i <= parts[1]; i++) {
             if (sizeDescription === "S") {
-              report[`${i}K`] = 0;
+              report[`${i}K`] = {"count":0,"sizzeDescription":sizeDescription};
             } else {
-              report[`${i}`] = 0;
+              report[`${i}`] = {"count":0,"sizzeDescription":sizeDescription};
             }
           }
         }
@@ -558,7 +558,7 @@ module.exports = {
           sizeKey = `${sizeKey}K`;
         }
 
-        report[sizeKey] = (report[sizeKey] || 0) + 1;
+        report[sizeKey]['count'] = (report[sizeKey]['count'] || 0) + 1;
         dataMap.cost_price += invoice.cost_price || 0;
         dataMap.selling_price += invoice.selling_price || 0;
         dataMap.profit += invoice.profit || 0;
