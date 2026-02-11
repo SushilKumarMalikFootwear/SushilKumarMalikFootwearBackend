@@ -1,48 +1,31 @@
 const FootwearModel = require("../models/footwear");
 const InvoiceModel = require("../models/invoice");
 const TraderFinances = require("../models/tarder_finances");
+
 module.exports = {
-  add_product(footwearObject) {
-    let promise = FootwearModel.create(footwearObject);
-    return promise;
-  },
-  async get_all_articles() {
-    let articles = FootwearModel.aggregate(
-      [
-        {
-          "$group": {
-            "_id": null,
-            "uniqueArticles": { "$addToSet": "$article" }
-          }
-        },
-        {
-          "$sort": { "article": 1 }
-        },
-        {
-          "$project": { "_id": 0, "uniqueArticles": 1 }
-        }
-      ]
-    );
-    return articles;
-  },
-  async get_all_labels() {
-    let labels = FootwearModel.aggregate([
-      {
-        "$group": {
-          "_id": null,
-          "uniqueLables": { "$addToSet": "$label" }
-        }
-      },
-      {
-        "$sort": { "label": 1 }
-      },
-      {
-        "$project": { "_id": 0, "uniqueLables": 1 }
-      }
-    ]);
-    return labels;
-  },
   async applyChanges() {
+    // Fetch latest 9 products
+    const products = await FootwearModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(7);
+
+    for (const product of products) {
+      // Ensure images exists and is an array
+      if (Array.isArray(product.images)) {
+        // Filter out null / undefined / empty values
+        const cleanedImages = product.images.filter(
+          (img) => img !== null && img !== undefined && img !== ""
+        );
+
+        // Only update if newImages is missing or empty
+        if (!Array.isArray(product.newImages) || product.newImages.length === 0) {
+          product.newImages = cleanedImages;
+          await product.save();
+        }
+      }
+    }
+
     // code for finging correct trader finances
     // let trader_finances = {
     //   "Baba Footwear": {
@@ -180,6 +163,46 @@ module.exports = {
     //   }
     // }
   },
+  add_product(footwearObject) {
+    let promise = FootwearModel.create(footwearObject);
+    return promise;
+  },
+  async get_all_articles() {
+    let articles = FootwearModel.aggregate(
+      [
+        {
+          "$group": {
+            "_id": null,
+            "uniqueArticles": { "$addToSet": "$article" }
+          }
+        },
+        {
+          "$sort": { "article": 1 }
+        },
+        {
+          "$project": { "_id": 0, "uniqueArticles": 1 }
+        }
+      ]
+    );
+    return articles;
+  },
+  async get_all_labels() {
+    let labels = FootwearModel.aggregate([
+      {
+        "$group": {
+          "_id": null,
+          "uniqueLables": { "$addToSet": "$label" }
+        }
+      },
+      {
+        "$sort": { "label": 1 }
+      },
+      {
+        "$project": { "_id": 0, "uniqueLables": 1 }
+      }
+    ]);
+    return labels;
+  },
   async view_all_products() {
     try {
       let footwears = await FootwearModel.find({
@@ -295,7 +318,8 @@ module.exports = {
             label: footwearObject.label,
             rating: footwearObject.rating,
             updated: footwearObject.updated,
-            size_description: footwearObject.size_description
+            size_description: footwearObject.size_description,
+            new_images: footwearObject.new_images
           },
         }
       );

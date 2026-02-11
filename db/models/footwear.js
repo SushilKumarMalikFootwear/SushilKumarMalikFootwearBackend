@@ -8,7 +8,7 @@ const footwear_pair_schema = new Schema({
 });
 const footwearSchema = new Schema(
   {
-    out_of_stock: {type: SchemaTypes.Boolean},
+    out_of_stock: { type: SchemaTypes.Boolean },
     footwear_id: { type: SchemaTypes.String },
     brand: { type: SchemaTypes.String },
     article: { type: SchemaTypes.String },
@@ -16,15 +16,16 @@ const footwearSchema = new Schema(
     selling_price: { type: SchemaTypes.Number },
     cost_price: { type: SchemaTypes.Number },
     category: { type: SchemaTypes.String },
-    label:{type: SchemaTypes.Array},
+    label: { type: SchemaTypes.Array },
     rating: { type: SchemaTypes.Number },
     color: { type: SchemaTypes.String },
-    pairs_in_stock: {type:[footwear_pair_schema]},
+    pairs_in_stock: { type: [footwear_pair_schema] },
     size_range: { type: SchemaTypes.String },
-    description:{type:SchemaTypes.String},
+    description: { type: SchemaTypes.String },
     vendor: { type: SchemaTypes.String },
-    images:{type:SchemaTypes.Array},
-    updated: {type: SchemaTypes.Boolean},
+    images: { type: SchemaTypes.Array },
+    newImages: { type: SchemaTypes.Array },
+    updated: { type: SchemaTypes.Boolean },
     size_description: { type: SchemaTypes.String },
   },
   {

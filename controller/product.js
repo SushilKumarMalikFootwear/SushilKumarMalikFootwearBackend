@@ -141,7 +141,8 @@ const productController = {
         label: request.body.label,
         rating: request.body.rating,
         update: request.body.update,
-        size_description: request.body.size_description
+        size_description: request.body.size_description,
+        new_images: request.body.new_images
       };
       let product = await productOperations.update_product(
         footwear_id,
