@@ -214,10 +214,7 @@ module.exports = {
         { $count: "count" }
       ]);
 
-      return {
-        footwears,
-        totalCount: totalCount.length > 0 ? totalCount[0].count : 0
-      };
+      return footwears;
     } catch (err) {
       console.log("ERROR is : ", err);
       return null;
