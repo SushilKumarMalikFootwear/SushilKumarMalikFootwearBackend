@@ -534,9 +534,9 @@ module.exports = {
           const parts = group.split("X").map(Number);
           for (let i = parts[0]; i <= parts[1]; i++) {
             if (sizeDescription === "S") {
-              report[`${i}K`] = {"count":0,"sizeDescription":sizeDescription};
+              report[`${i}K`] = { "count": 0, "sizeDescription": sizeDescription };
             } else {
-              report[`${i}`] = {"count":0,"sizeDescription":sizeDescription};
+              report[`${i}`] = { "count": 0, "sizeDescription": sizeDescription };
             }
           }
         }
@@ -569,5 +569,122 @@ module.exports = {
       console.error("Error in getInvoicesForSizesSalesReport:", error);
       throw error;
     }
+  },
+  async getRolling12MonthComparison() {
+    try {
+      const today = new Date();
+
+      // End date = today
+      const currentEnd = new Date(today);
+
+      // Start date = 12 months before (aligned)
+      const currentStart = new Date(
+        today.getFullYear(),
+        today.getMonth() - 11,
+        1
+      );
+
+      // Previous period (exact same day alignment)
+      const previousEnd = new Date(
+        today.getFullYear() - 1,
+        today.getMonth(),
+        today.getDate()
+      );
+
+      const previousStart = new Date(
+        today.getFullYear() - 1,
+        today.getMonth() - 11,
+        1
+      );
+
+      // ------------------------------
+      // CURRENT 12 MONTHS
+      // ------------------------------
+      const currentData = await InvoiceModel.aggregate([
+        {
+          $match: {
+            invoice_status: "COMPLETED",
+            invoice_date: {
+              $gte: currentStart,
+              $lte: currentEnd,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalSales: { $sum: "$selling_price" },
+            totalProfit: { $sum: "$profit" },
+          },
+        },
+      ]);
+
+      // ------------------------------
+      // PREVIOUS 12 MONTHS
+      // ------------------------------
+      const previousData = await InvoiceModel.aggregate([
+        {
+          $match: {
+            invoice_status: "COMPLETED",
+            invoice_date: {
+              $gte: previousStart,
+              $lte: previousEnd,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalSales: { $sum: "$selling_price" },
+            totalProfit: { $sum: "$profit" },
+          },
+        },
+      ]);
+
+      const currentSales =
+        currentData[0]?.totalSales || 0;
+      const previousSales =
+        previousData[0]?.totalSales || 0;
+
+      const currentProfit =
+        currentData[0]?.totalProfit || 0;
+      const previousProfit =
+        previousData[0]?.totalProfit || 0;
+
+      const calculatePercent = (current, previous) => {
+        if (previous === 0) return 0;
+        return ((current - previous) / previous) * 100;
+      };
+
+      return {
+        currentPeriod: {
+          start: currentStart,
+          end: currentEnd,
+        },
+        previousPeriod: {
+          start: previousStart,
+          end: previousEnd,
+        },
+        currentSales,
+        previousSales,
+        salesChangePercent: calculatePercent(
+          currentSales,
+          previousSales
+        ),
+        currentProfit,
+        previousProfit,
+        profitChangePercent: calculatePercent(
+          currentProfit,
+          previousProfit
+        ),
+      };
+    } catch (error) {
+      console.error(
+        "Error in getRolling12MonthComparison:",
+        error
+      );
+      throw error;
+    }
   }
+
 };

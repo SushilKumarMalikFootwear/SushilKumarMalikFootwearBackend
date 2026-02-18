@@ -23,7 +23,8 @@ module.exports = {
             UPDATE_INVOICE: '/updateInvoice',
             FETCH_INVOICES: '/fetchInvoices',
             MONTHLY_SALES_REPORT: '/monthlySalesReport',
-            FETCH_SIZES_SALES_REPORT: '/fetchSizesSalesReport'
+            FETCH_SIZES_SALES_REPORT: '/fetchSizesSalesReport',
+            ROLLING_12_MONTH_COMPARISON: '/rolling-12-month-comparison'
         },
         TRADER_FINANCES: {
             GET_TRADER_FINANCES: '/get_trader_finances',

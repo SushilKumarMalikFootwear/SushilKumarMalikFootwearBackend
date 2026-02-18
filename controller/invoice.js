@@ -88,6 +88,20 @@ const invoiceController = {
         error: error.message,
       });
     }
+  },
+  async getRolling12MonthComparison(req, res) {
+    try {
+      const result =
+        await InvoiceOperations.getRolling12MonthComparison();
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({
+        message: "Server crash",
+        error: error.message,
+      });
+    }
   }
+
 };
 module.exports = invoiceController;
