@@ -92,7 +92,7 @@ const invoiceController = {
   async getRolling12MonthComparison(req, res) {
     try {
       const result =
-        await InvoiceOperations.getRolling12MonthComparison();
+        await invoiceOperations.getRolling12MonthComparison();
 
       res.status(200).json(result);
     } catch (error) {
