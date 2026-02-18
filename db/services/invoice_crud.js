@@ -657,26 +657,10 @@ module.exports = {
       };
 
       return {
-        currentPeriod: {
-          start: currentStart,
-          end: currentEnd,
-        },
-        previousPeriod: {
-          start: previousStart,
-          end: previousEnd,
-        },
         currentSales,
         previousSales,
-        salesChangePercent: calculatePercent(
-          currentSales,
-          previousSales
-        ),
         currentProfit,
         previousProfit,
-        profitChangePercent: calculatePercent(
-          currentProfit,
-          previousProfit
-        ),
       };
     } catch (error) {
       console.error(
@@ -685,6 +669,86 @@ module.exports = {
       );
       throw error;
     }
-  }
+  },
+
+  async getCurrentMonthMTDComparison() {
+    try {
+      const today = new Date();
+
+      const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endOfCurrentMTD = today;
+
+      const startOfPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const endOfPrevMonthMTD = new Date(
+        today.getFullYear(),
+        today.getMonth() - 1,
+        today.getDate()
+      );
+
+      const startOfSameMonthLastYear = new Date(
+        today.getFullYear() - 1,
+        today.getMonth(),
+        1
+      );
+      const endOfSameMonthLastYearMTD = new Date(
+        today.getFullYear() - 1,
+        today.getMonth(),
+        today.getDate()
+      );
+
+      const aggregateBetween = async (start, end) => {
+        const result = await InvoiceModel.aggregate([
+          {
+            $match: {
+              invoice_status: "COMPLETED",
+              invoice_date: {
+                $gte: start,
+                $lte: end,
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              totalSP: { $sum: "$selling_price" },
+              totalProfit: { $sum: "$profit" },
+            },
+          },
+        ]);
+
+        return result[0] || { totalSP: 0, totalProfit: 0 };
+      };
+
+      const current = await aggregateBetween(
+        startOfCurrentMonth,
+        endOfCurrentMTD
+      );
+
+      const prevMonth = await aggregateBetween(
+        startOfPrevMonth,
+        endOfPrevMonthMTD
+      );
+
+      const lastYear = await aggregateBetween(
+        startOfSameMonthLastYear,
+        endOfSameMonthLastYearMTD
+      );
+
+      return {
+        currentSales: current.totalSP,
+        currentProfit: current.totalProfit,
+
+        prevMonthSales: prevMonth.totalSP,
+        prevMonthProfit: prevMonth.totalProfit,
+
+        lastYearSales: lastYear.totalSP,
+        lastYearProfit: lastYear.totalProfit,
+      };
+
+    } catch (error) {
+      console.error("Error in getCurrentMonthMTDComparison:", error);
+      throw error;
+    }
+  },
 
 };

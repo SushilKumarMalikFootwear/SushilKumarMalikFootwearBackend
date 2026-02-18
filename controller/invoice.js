@@ -101,7 +101,28 @@ const invoiceController = {
         error: error.message,
       });
     }
-  }
+  },
+    async getCurrentMonthMTDComparison(req, res) {
+    try {
+      const result =
+        await invoiceOperations.getCurrentMonthMTDComparison();
+
+      if (result) {
+        return res.status(SUCCESS).json(result);
+      }
+
+      return res
+        .status(NOT_FOUND)
+        .json({ message: messageBundle["unsuccessful"] });
+
+    } catch (error) {
+      console.error("Controller error:", error);
+      return res.status(SERVER_CRASH).json({
+        message: messageBundle["server.crash"],
+        error: error.message,
+      });
+    }
+  },
 
 };
 module.exports = invoiceController;

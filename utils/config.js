@@ -24,7 +24,8 @@ module.exports = {
             FETCH_INVOICES: '/fetchInvoices',
             MONTHLY_SALES_REPORT: '/monthlySalesReport',
             FETCH_SIZES_SALES_REPORT: '/fetchSizesSalesReport',
-            ROLLING_12_MONTH_COMPARISON: '/rolling-12-month-comparison'
+            ROLLING_12_MONTH_COMPARISON: '/rolling-12-month-comparison',
+            CURRENT_MONTH_MTD_COMPARISON: "/current-month-mtd-comparison"
         },
         TRADER_FINANCES: {
             GET_TRADER_FINANCES: '/get_trader_finances',
