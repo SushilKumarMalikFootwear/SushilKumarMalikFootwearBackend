@@ -3,7 +3,8 @@ const {CONFIG_LISTS} = require('../../utils/config').SCHEMAS;
 const mongoose = require('../connect');
 const configListsSchema = new Schema({
     categoryList : {type:SchemaTypes.Array},
-    sizeRangeList : {type:SchemaTypes.Array}
+    sizeRangeList : {type:SchemaTypes.Array},
+    sizesMap: { type: SchemaTypes.Mixed, default: {} }
     }
 );
 const ConfigListsModel = mongoose.model(CONFIG_LISTS,configListsSchema);

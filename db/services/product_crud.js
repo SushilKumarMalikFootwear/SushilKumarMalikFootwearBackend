@@ -2,55 +2,56 @@ const FootwearModel = require("../models/footwear");
 const InvoiceModel = require("../models/invoice");
 const TraderFinances = require("../models/tarder_finances");
 const TraderFinancesLogs = require("../models/trader_finances_logs")
+const ConfigList = require("../models/config_lists")
 
 module.exports = {
   async applyChanges() {
-    let trader_finances = {};
-    let trader_finances_logs = await TraderFinancesLogs.find();
-    for (const log of trader_finances_logs) {
-      const traderName = log.trader_name;
-      if (!trader_finances[traderName]) {
-        trader_finances[traderName] = {
-          trader_name: traderName,
-          total_cost_price: 0,
-          cost_price_of_sold: 0,
-          selling_price_of_sold: 0,
-        };
-      }
-      if (log.type === "PURCHASE") {
-        trader_finances[traderName].total_cost_price += log.amount || 0;
-      }
-    }
-    console.log(trader_finances);
-    let invoices = await InvoiceModel.find();
-    for (let i = 0; i < invoices.length; i++) {
-      let invoice = invoices[i];
-      if (invoice.invoice_status != "RETURNED") {
-        let trader = trader_finances[invoice.vendor];
-        trader["cost_price_of_sold"] += invoice.cost_price;
-        trader["selling_price_of_sold"] += invoice.selling_price;
-        if (invoice.add_in_total_cost) {
-          trader["total_cost_price"] += invoice.cost_price;
-        }
+    // let trader_finances = {};
+    // let trader_finances_logs = await TraderFinancesLogs.find();
+    // for (const log of trader_finances_logs) {
+    //   const traderName = log.trader_name;
+    //   if (!trader_finances[traderName]) {
+    //     trader_finances[traderName] = {
+    //       trader_name: traderName,
+    //       total_cost_price: 0,
+    //       cost_price_of_sold: 0,
+    //       selling_price_of_sold: 0,
+    //     };
+    //   }
+    //   if (log.type === "PURCHASE") {
+    //     trader_finances[traderName].total_cost_price += log.amount || 0;
+    //   }
+    // }
+    // console.log(trader_finances);
+    // let invoices = await InvoiceModel.find();
+    // for (let i = 0; i < invoices.length; i++) {
+    //   let invoice = invoices[i];
+    //   if (invoice.invoice_status != "RETURNED") {
+    //     let trader = trader_finances[invoice.vendor];
+    //     trader["cost_price_of_sold"] += invoice.cost_price;
+    //     trader["selling_price_of_sold"] += invoice.selling_price;
+    //     if (invoice.add_in_total_cost) {
+    //       trader["total_cost_price"] += invoice.cost_price;
+    //     }
 
-      }
-    }
-    console.log(trader_finances);
-    for (const traderName in trader_finances) {
-      if (trader_finances.hasOwnProperty(traderName)) {
-        const update = await TraderFinances.updateOne(
-          { trader_name: traderName },
-          {
-            $set: {
-              total_cost_price: trader_finances[traderName].total_cost_price,
-              cost_price_of_sold: trader_finances[traderName].cost_price_of_sold,
-              selling_price_of_sold: trader_finances[traderName].selling_price_of_sold,
-            },
-          }
-        );
-        console.log(`Updated ${traderName}:`, update);
-      }
-    }
+    //   }
+    // }
+    // console.log(trader_finances);
+    // for (const traderName in trader_finances) {
+    //   if (trader_finances.hasOwnProperty(traderName)) {
+    //     const update = await TraderFinances.updateOne(
+    //       { trader_name: traderName },
+    //       {
+    //         $set: {
+    //           total_cost_price: trader_finances[traderName].total_cost_price,
+    //           cost_price_of_sold: trader_finances[traderName].cost_price_of_sold,
+    //           selling_price_of_sold: trader_finances[traderName].selling_price_of_sold,
+    //         },
+    //       }
+    //     );
+    //     console.log(`Updated ${traderName}:`, update);
+    //   }
+    // }
 
     // code to find -ve pairs in stock
     // let products = await FootwearModel.find();
