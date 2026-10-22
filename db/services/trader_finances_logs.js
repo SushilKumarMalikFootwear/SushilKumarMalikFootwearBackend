@@ -44,11 +44,6 @@ module.exports = {
             if (fromDate || toDate) {
                 filter.date = {};
 
-                const toUtcDate = (dateStr) => {
-                    const [datePart, timePart] = dateStr.split(' ');
-                    return new Date(`${datePart}T${timePart}`);
-                };
-
                 if (fromDate) {
                     filter.date.$gte = new Date(fromDate);
                 }

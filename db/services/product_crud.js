@@ -1,8 +1,4 @@
 const FootwearModel = require("../models/footwear");
-const InvoiceModel = require("../models/invoice");
-const TraderFinances = require("../models/tarder_finances");
-const TraderFinancesLogs = require("../models/trader_finances_logs")
-const ConfigList = require("../models/config_lists")
 
 module.exports = {
   async applyChanges() {
@@ -204,10 +200,7 @@ module.exports = {
       const skip = (page - 1) * limit;
       filterAggregatePipeline.push({ $skip: skip });
       filterAggregatePipeline.push({ $limit: limit });
-      let footwears =
-        filterAggregatePipeline.length === 0
-          ? await FootwearModel.find().sort({ _id: -1 }).skip(skip).limit(limit)
-          : await FootwearModel.aggregate(filterAggregatePipeline);
+      let footwears = await FootwearModel.aggregate(filterAggregatePipeline);
       const totalCount = await FootwearModel.aggregate([
         ...filterAggregatePipeline.filter(stage =>
           !stage.$skip && !stage.$limit && !stage.$sort
@@ -224,11 +217,7 @@ module.exports = {
   async view_by_product_id(footwear_id) {
     try {
       let footwear = await FootwearModel.find({ footwear_id: footwear_id });
-      if (footwear) {
-        return footwear;
-      } else {
-        return null;
-      }
+      return footwear;
     } catch (err) {
       console.log("ERROR is : ", err);
     }

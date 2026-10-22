@@ -25,7 +25,6 @@ module.exports = {
     }
     if (invoice.add_in_total_cost == true) {
       console.log("updating total cost");
-      invoice.add_in_total_cost == true;
       await traderFinancesOperation.updateTotalCostPrice(
         invoice.vendor,
         invoice.cost_price
@@ -41,7 +40,7 @@ module.exports = {
     );
 
     let promise = InvoiceModel.create(invoice);
-    promise.then((val) => {
+    promise.then(() => {
       console.log("invoice created " + invoice.invoice_no);
     });
     return promise;
@@ -494,9 +493,7 @@ module.exports = {
         return {};
       }
 
-      const sizeSet = [];
       const footwearIds = footwears.map((f) => {
-        sizeSet.push(f.size_range);
         return f.footwear_id.toString();
       });
 

@@ -8,14 +8,10 @@ module.exports = {
     },
     STATUS_CODES: {
         SUCCESS: 200,
-        SUCCESS2: 201,
         SERVER_CRASH: 500,
-        FILE_NOT_FOUND: 404,
         NOT_FOUND: 404
     },
     ROUTES: {
-        MY_API: '/my_api',
-        DIRECT_CHANGE: '/direct_change',
         ROOT: '/',
         GET_CONFIF_LISTS: '/get_config_lists',
         INVOICE: {

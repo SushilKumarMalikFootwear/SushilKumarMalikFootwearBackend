@@ -89,14 +89,7 @@ const productController = {
   async get_all_articles(request, response) {
     try {
       let articles = await productOperations.get_all_articles();
-      if (articles) {
-        response.status(SUCCESS).json({ "articles": articles });
-      } else {
-        response
-          .status(SERVER_CRASH)
-          .json({ message: messageBundle["unsuccessful"], ERROR: err });
-
-      }
+      response.status(SUCCESS).json({ "articles": articles });
     } catch (err) {
       response
         .status(SERVER_CRASH)
@@ -106,14 +99,7 @@ const productController = {
   async get_all_labels(request, response) {
     try {
       let labels = await productOperations.get_all_labels();
-      if (labels) {
-        response.status(SUCCESS).json({ "labels": labels });
-      } else {
-        response
-          .status(SERVER_CRASH)
-          .json({ message: messageBundle["unsuccessful"], ERROR: err });
-
-      }
+      response.status(SUCCESS).json({ "labels": labels });
     } catch (err) {
       response
         .status(SERVER_CRASH)

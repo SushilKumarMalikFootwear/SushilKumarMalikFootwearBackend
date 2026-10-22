@@ -1,4 +1,4 @@
-const { SUCCESS, SERVER_CRASH, NOT_FOUND } = require('../utils/config').STATUS_CODES;
+const { SUCCESS, NOT_FOUND } = require('../utils/config').STATUS_CODES;
 const messageBundle = require('../locales/en');
 const TraderFinancesOperations = require("../db/services/trader_finances");
 const configListsController = {
