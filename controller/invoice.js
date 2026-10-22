@@ -2,6 +2,8 @@ const { SUCCESS, SERVER_CRASH, NOT_FOUND } =
   require("../utils/config").STATUS_CODES;
 const messageBundle = require("../locales/en");
 const invoiceOperations = require("../db/services/invoice_crud");
+const salesInsights = require("../db/services/sales_insights");
+const BAD_REQUEST = 400;
 const invoiceController = {
   add(request, response) {
     let invoiceObject = request.body;
@@ -119,6 +121,34 @@ const invoiceController = {
       console.error("Controller error:", error);
       return res.status(SERVER_CRASH).json({
         message: messageBundle["server.crash"],
+        error: error.message,
+      });
+    }
+  },
+  async getSalesInsights(req, res) {
+    try {
+      const { startDate, endDate, soldAt = "ALL", growthPct, forceGrowth, adjustByPace, limit } = req.body;
+      const ymd = /^\d{4}-\d{2}-\d{2}$/;
+      if (!ymd.test(startDate || "") || !ymd.test(endDate || "") || startDate > endDate) {
+        return res.status(BAD_REQUEST).json({ message: "startDate and endDate must be YYYY-MM-DD and startDate <= endDate" });
+      }
+      if (!["ALL", "SHOP", "HOME"].includes(soldAt)) {
+        return res.status(BAD_REQUEST).json({ message: "soldAt must be ALL, SHOP or HOME" });
+      }
+      const result = await salesInsights.getSalesInsights({
+        startDate,
+        endDate,
+        soldAt,
+        growthPct,
+        forceGrowth: forceGrowth === true,
+        adjustByPace: adjustByPace === true,
+        limit: Number(limit) > 0 ? Number(limit) : 10,
+      });
+      return res.status(SUCCESS).json(result);
+    } catch (error) {
+      console.error("Error in getSalesInsights controller:", error);
+      return res.status(SERVER_CRASH).json({
+        message: messageBundle["unsuccessful"],
         error: error.message,
       });
     }
