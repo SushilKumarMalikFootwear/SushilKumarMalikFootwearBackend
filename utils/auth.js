@@ -2,12 +2,9 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const cfg = require("./website_config");
 
+// Presence and length are checked at startup (utils/env.js).
 function jwtSecret() {
-  const secret = process.env.JWT_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error("JWT_SECRET must be set to a random string of at least 32 characters.");
-  }
-  return secret;
+  return process.env.JWT_SECRET;
 }
 
 // ---- Passwords (scrypt, built into Node; no extra package) ----
@@ -47,8 +44,7 @@ function otpMatches(email, purpose, code, storedHash) {
 
 // ---- Admins ----
 function adminEmails() {
-  return String(process.env.ADMIN_EMAILS || "")
-    .split(",")
+  return process.env.ADMIN_EMAILS.split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 }
@@ -121,10 +117,10 @@ function requireAdmin(req, res, next) {
     .catch(next);
 }
 
-// Protects the existing app endpoints. Off until ADMIN_AUTH_ENFORCED=true,
-// so the current mobile app keeps working until it is updated to log in.
+// Protects the existing app endpoints. ADMIN_AUTH_ENFORCED must be set
+// explicitly: "false" while the mobile app has no login screen, "true" once it does.
 function legacyAdminGuard(req, res, next) {
-  if (process.env.ADMIN_AUTH_ENFORCED !== "true") return next();
+  if (process.env.ADMIN_AUTH_ENFORCED === "false") return next();
   return requireAdmin(req, res, next);
 }
 

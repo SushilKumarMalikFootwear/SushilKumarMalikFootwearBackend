@@ -6,7 +6,7 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
 
 let mongo, server, base, mongoose, FootwearModel, InvoiceModel, catalog;
 const ADMIN = "owner@example.com";
-const codes = []; // OTP codes printed by the mailer in dev mode
+const codes = []; // OTP codes captured by the fake mailbox
 
 const DAY = 24 * 60 * 60 * 1000;
 const pairs = (spec) =>
@@ -39,19 +39,21 @@ before(async () => {
   process.env.NODE_ENV = "test";
   process.env.JWT_SECRET = "test-secret-test-secret-test-secret-1234";
   process.env.ADMIN_EMAILS = ADMIN;
-  // Set these to empty (not delete) so values from a real .env are never
-  // loaded: tests must not send real emails or use real keys.
-  process.env.GMAIL_USER = "";
-  process.env.GMAIL_APP_PASSWORD = "";
-  process.env.UPLOADTHING_SECRET = "";
-  process.env.UPLOADTHING_TOKEN = "";
+  // Fake values set BEFORE the app loads, so the real .env is never used:
+  // tests must not send real emails or use real keys.
+  process.env.GMAIL_USER = "test-sender@example.com";
+  process.env.GMAIL_APP_PASSWORD = "not-a-real-password";
+  process.env.UPLOADTHING_SECRET = "sk_test_not_real";
+  process.env.WHATSAPP_NUMBER = "919213517228";
   process.env.ADMIN_AUTH_ENFORCED = "false";
-  const origLog = console.log;
-  console.log = (...args) => {
-    const m = String(args[0]).match(/^\[dev\] (\w+) code for (\S+): (\d+)/);
-    if (m) codes.push({ purpose: m[1], email: m[2], code: m[3] });
-    else origLog(...args);
-  };
+
+  // Fake mailbox: capture codes instead of sending email.
+  require("../utils/mailer").useTransportForTests({
+    async sendMail(msg) {
+      codes.push({ purpose: msg.headers["X-ND-Purpose"], email: msg.to, code: msg.subject.split(" ")[0] });
+      return { accepted: [msg.to] };
+    },
+  });
 
   const app = require("../app");
   mongoose = require("../db/connect");
@@ -339,4 +341,18 @@ test("existing app endpoints stay open until ADMIN_AUTH_ENFORCED=true", async ()
   } finally {
     process.env.ADMIN_AUTH_ENFORCED = "false";
   }
+});
+
+test("server refuses to start when a setting is missing", () => {
+  const { checkEnv } = require("../utils/env");
+  const saved = process.env.WHATSAPP_NUMBER;
+  try {
+    delete process.env.WHATSAPP_NUMBER;
+    assert.throws(checkEnv, /WHATSAPP_NUMBER is not set/);
+    process.env.WHATSAPP_NUMBER = "9213517228";
+    assert.throws(checkEnv, /country code/);
+  } finally {
+    process.env.WHATSAPP_NUMBER = saved;
+  }
+  assert.doesNotThrow(checkEnv);
 });

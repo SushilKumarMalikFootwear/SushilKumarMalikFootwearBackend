@@ -50,7 +50,7 @@ function whatsappText(order) {
 }
 
 function whatsappUrl(order) {
-  return `https://wa.me/${cfg.WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText(order))}`;
+  return `https://wa.me/${process.env.WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText(order))}`;
 }
 
 /**

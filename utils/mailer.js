@@ -4,16 +4,21 @@ const cfg = require("./website_config");
 let transporter = null;
 
 function getTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) return null;
   if (!transporter) {
     transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: { user, pass: pass.replace(/\s+/g, "") },
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD.replace(/\s+/g, ""),
+      },
     });
   }
   return transporter;
+}
+
+// Tests replace the Gmail transport with a fake one so they never send real email.
+function useTransportForTests(fake) {
+  transporter = fake;
 }
 
 const SUBJECTS = {
@@ -29,18 +34,9 @@ const INTROS = {
 };
 
 async function sendOtpEmail(to, purpose, code) {
-  const transport = getTransporter();
-  if (!transport) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Email is not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD.");
-    }
-    // Local development without Gmail: print the code instead of emailing it.
-    console.log(`[dev] ${purpose} code for ${to}: ${code}`);
-    return;
-  }
   const subject = `${code} is your ${cfg.SHOP_NAME} code`;
   const minutes = cfg.OTP_TTL_MINUTES;
-  await transport.sendMail({
+  await getTransporter().sendMail({
     from: `"${cfg.SHOP_NAME}" <${process.env.GMAIL_USER}>`,
     to,
     subject,
@@ -52,7 +48,9 @@ async function sendOtpEmail(to, purpose, code) {
       <p style="color:#666">The code expires in ${minutes} minutes. If you did not ask for it, ignore this email.</p>
       <p style="color:#8f6c25;font-weight:bold">${cfg.SHOP_NAME}</p>
     </div>`,
+    // Lets tests read which code was sent without parsing the text.
+    headers: { "X-ND-Purpose": purpose },
   });
 }
 
-module.exports = { sendOtpEmail };
+module.exports = { sendOtpEmail, useTransportForTests };

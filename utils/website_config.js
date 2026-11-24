@@ -2,8 +2,6 @@
 
 module.exports = {
   SHOP_NAME: "N.D. Footwear",
-  // WhatsApp number that receives orders (with country code, digits only).
-  WHATSAPP_NUMBER: process.env.WHATSAPP_NUMBER || "919213517228",
 
   // Tags offered in the admin app even before any product uses them.
   DEFAULT_TAGS: ["Super soft", "Soft", "Very flexible", "Lightweight", "Office wear", "Party wear", "Daily wear"],

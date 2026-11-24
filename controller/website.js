@@ -2,20 +2,6 @@ const catalog = require("../db/services/website_catalog");
 const orders = require("../db/services/website_orders");
 const cfg = require("../utils/website_config");
 
-// UploadThing gives either a secret key (sk_live_...) or, on newer
-// dashboards, an UPLOADTHING_TOKEN (base64 JSON that contains the key).
-function uploadthingApiKey() {
-  if (process.env.UPLOADTHING_SECRET) return process.env.UPLOADTHING_SECRET.trim();
-  const token = process.env.UPLOADTHING_TOKEN;
-  if (!token) return null;
-  try {
-    const parsed = JSON.parse(Buffer.from(token.trim().replace(/^['"]|['"]$/g, ""), "base64").toString("utf8"));
-    return parsed.apiKey || null;
-  } catch {
-    return null;
-  }
-}
-
 module.exports = {
   // GET /public/products?category=&tag=&size=&q=&min_price=&max_price=&sort=&page=&limit=
   async listProducts(req, res, next) {
@@ -58,7 +44,7 @@ module.exports = {
     res.set("Cache-Control", "public, max-age=3600");
     res.json({
       name: cfg.SHOP_NAME,
-      whatsapp: cfg.WHATSAPP_NUMBER,
+      whatsapp: process.env.WHATSAPP_NUMBER,
       stores: [
         { name: "N.D. Footwear (Home store)", map_url: "https://maps.app.goo.gl/u9RsuT267dCJCDCW6", lat: 28.4516267, lng: 77.0204276, hours: null },
         { name: "N.D. Footwear (Sadar Bazar)", map_url: "https://maps.app.goo.gl/RELcQ5tM9S5GGYYY6", lat: 28.4605432, lng: 77.0284808, hours: null },
@@ -102,8 +88,7 @@ module.exports = {
   // Returns a one-time upload URL so the app never holds the UploadThing key.
   async presignUpload(req, res, next) {
     try {
-      const key = uploadthingApiKey();
-      if (!key) return res.status(500).json({ message: "Uploads are not configured (UPLOADTHING_SECRET or UPLOADTHING_TOKEN)." });
+      const key = process.env.UPLOADTHING_SECRET.trim();
       const name = String(req.body.name || "photo.jpg").slice(0, 120);
       const size = Number(req.body.size);
       const type = String(req.body.type || "");
