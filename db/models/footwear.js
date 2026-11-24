@@ -6,6 +6,14 @@ const footwear_pair_schema = new Schema({
   available_at: { type: SchemaTypes.String },
   quantity: { type: SchemaTypes.Number },
 });
+// One photo or video shown on the customer website.
+const website_media_schema = new Schema(
+  {
+    type: { type: SchemaTypes.String, enum: ["image", "video"], default: "image" },
+    url: { type: SchemaTypes.String, required: true },
+  },
+  { _id: false }
+);
 const footwearSchema = new Schema(
   {
     out_of_stock: { type: SchemaTypes.Boolean },
@@ -27,10 +35,29 @@ const footwearSchema = new Schema(
     newImages: { type: SchemaTypes.Array },
     updated: { type: SchemaTypes.Boolean },
     size_description: { type: SchemaTypes.String },
+
+    // ---- Customer website ----
+    // Only products with this switched on are visible on the website.
+    show_on_website: { type: SchemaTypes.Boolean, default: false },
+    // Products sharing a group key appear as ONE product on the website
+    // (different colours become colour options, different size ranges of
+    // the same colour are merged into one size list).
+    group_key: { type: SchemaTypes.String, trim: true },
+    // Price on the website. When empty, selling_price is used.
+    website_price: { type: SchemaTypes.Number },
+    // Photos (and later videos) for the website, separate from internal images.
+    website_media: { type: [website_media_schema], default: undefined },
+    // Customer-facing tags, e.g. "Super soft". Separate from internal `label`.
+    tags: { type: [SchemaTypes.String], default: undefined },
+    // Set by the server the first time show_on_website is switched on, and
+    // never changed afterwards. Drives the "New arrival" tag.
+    website_first_shown_at: { type: SchemaTypes.Date },
   },
   {
     timestamps: true, //this will add time in data object when the  is created in database
   }
 );
+footwearSchema.index({ show_on_website: 1 });
+footwearSchema.index({ group_key: 1 });
 const FootwearModel = mongoose.model(FOOTWEAR, footwearSchema);
 module.exports = FootwearModel;

@@ -78,8 +78,45 @@ module.exports = {
     // }
   },
   add_product(footwearObject) {
+    // The server owns this date; never accept it from the client.
+    delete footwearObject.website_first_shown_at;
+    if (footwearObject.show_on_website === true) {
+      footwearObject.website_first_shown_at = new Date();
+    }
     let promise = FootwearModel.create(footwearObject);
     return promise;
+  },
+  // Records the first time a product was switched on for the website.
+  // Only sets the date if it was never set, so switching off and on again
+  // does not make a product "new" again.
+  async mark_first_shown_on_website(footwear_id) {
+    return FootwearModel.updateOne(
+      {
+        footwear_id: footwear_id,
+        show_on_website: true,
+        website_first_shown_at: { $exists: false },
+      },
+      { $set: { website_first_shown_at: new Date() } }
+    );
+  },
+  async get_all_group_keys() {
+    // The website ignores capitals/spaces when grouping, so suggest each key
+    // once, using its most common spelling.
+    const rows = await FootwearModel.aggregate([
+      { $match: { group_key: { $exists: true, $ne: "" } } },
+      { $group: { _id: "$group_key", n: { $sum: 1 } } },
+    ]);
+    const best = new Map();
+    for (const { _id: key, n } of rows) {
+      const norm = require("./website_catalog").slugify(key);
+      const current = best.get(norm);
+      if (!current || n > current.n) best.set(norm, { key, n });
+    }
+    return [...best.values()].map((v) => v.key).sort((a, b) => a.localeCompare(b));
+  },
+  async get_all_tags() {
+    const tags = await FootwearModel.distinct("tags");
+    return tags.filter(Boolean).sort((a, b) => a.localeCompare(b));
   },
   async get_all_articles() {
     let articles = FootwearModel.aggregate(
@@ -175,6 +212,15 @@ module.exports = {
             filterAggregatePipeline.push(filter_by_vendor(filterObject[key]));
           else if (key == "label")
             filterAggregatePipeline.push(filter_by_label(filterObject[key]));
+          else if (key == "group_key")
+            filterAggregatePipeline.push({ $match: { group_key: filterObject[key] } });
+          else if (key == "show_on_website") {
+            const on = filterObject[key] === true || filterObject[key] === "true";
+            // Products created before this field existed count as "off".
+            filterAggregatePipeline.push({
+              $match: on ? { show_on_website: true } : { show_on_website: { $ne: true } },
+            });
+          }
         }
       }
       if (filterObject.rating_more_than || filterObject.rating_less_than) {
@@ -222,7 +268,9 @@ module.exports = {
       console.log("ERROR is : ", err);
     }
   },
-  async update_product(footwear_id, footwearObject) {
+  // `websiteUpdate` ({ $set, $unset } from utils/website_fields) is optional:
+  // stock updates from invoices don't pass it, so website fields stay as they are.
+  async update_product(footwear_id, footwearObject, websiteUpdate) {
     try {
       let out_of_stock = true;
       let arr = [...footwearObject.pairs_in_stock];
@@ -234,12 +282,16 @@ module.exports = {
       if (footwearObject.description) {
         out_of_stock = false;
       }
+      const extraSet = (websiteUpdate && websiteUpdate.$set) || {};
+      const extraUnset = (websiteUpdate && websiteUpdate.$unset) || {};
       let update = await FootwearModel.updateOne(
         {
           footwear_id: footwear_id,
         },
         {
+          ...(Object.keys(extraUnset).length ? { $unset: extraUnset } : {}),
           $set: {
+            ...extraSet,
             brand: footwearObject.brand,
             sub_brand: footwearObject.sub_brand,
             article: footwearObject.article,

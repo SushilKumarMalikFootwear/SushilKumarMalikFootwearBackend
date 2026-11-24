@@ -1,23 +1,28 @@
 {
   "name": "footwear-backend",
   "version": "1.0.0",
-  "description": "Footwear backend API using Node.js, Express, and MongoDB, deployable on Vercel",
+  "description": "N.D. Footwear backend API (admin app + customer website). Node.js, Express, MongoDB; deployed on Vercel",
   "engines": {
     "node": ">=18.0.0"
   },
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^18.0.10",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
+    "nodemailer": "^10.6.1",
     "serverless-http": "^3.2.0",
     "uniqid": "^5.4.0"
   },
   "devDependencies": {
+    "mongodb-memory-server": "^11.4.0",
     "nodemon": "^3.1.0"
   },
   "repository": {
