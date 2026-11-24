@@ -39,7 +39,13 @@ before(async () => {
   process.env.NODE_ENV = "test";
   process.env.JWT_SECRET = "test-secret-test-secret-test-secret-1234";
   process.env.ADMIN_EMAILS = ADMIN;
-  delete process.env.GMAIL_USER;
+  // Set these to empty (not delete) so values from a real .env are never
+  // loaded: tests must not send real emails or use real keys.
+  process.env.GMAIL_USER = "";
+  process.env.GMAIL_APP_PASSWORD = "";
+  process.env.UPLOADTHING_SECRET = "";
+  process.env.UPLOADTHING_TOKEN = "";
+  process.env.ADMIN_AUTH_ENFORCED = "false";
   const origLog = console.log;
   console.log = (...args) => {
     const m = String(args[0]).match(/^\[dev\] (\w+) code for (\S+): (\d+)/);
@@ -331,6 +337,6 @@ test("existing app endpoints stay open until ADMIN_AUTH_ENFORCED=true", async ()
     assert.equal((await call("GET", "/view_all_footwears", null, adminToken)).status, 200);
     assert.equal((await call("GET", "/public/products")).status, 200, "public pages stay open");
   } finally {
-    delete process.env.ADMIN_AUTH_ENFORCED;
+    process.env.ADMIN_AUTH_ENFORCED = "false";
   }
 });
