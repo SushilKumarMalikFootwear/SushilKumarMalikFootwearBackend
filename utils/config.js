@@ -9,7 +9,8 @@ module.exports = {
     STATUS_CODES: {
         SUCCESS: 200,
         SERVER_CRASH: 500,
-        NOT_FOUND: 404
+        NOT_FOUND: 404,
+        BAD_REQUEST: 400
     },
     ROUTES: {
         ROOT: '/',
@@ -25,14 +26,12 @@ module.exports = {
             SALES_INSIGHTS: "/salesInsights"
         },
         TRADER_FINANCES: {
-            GET_TRADER_FINANCES: '/get_trader_finances',
-            UPDATE_TOTAL_COST_PRICE: '/update_total_cost_price'
+            GET_TRADER_FINANCES: '/get_trader_finances'
         },
         TRADER_FINANCES_LOGS: {
-            GET_PENDING_BILLS: '/get_pending_bills',
-            SAVE_TRADER_FINANCE_LOG: '/save_log',
-            DECREASE_PENDING_AMOUNT: '/decrease_pending_payment',
-            GET_LAST_RUNNING_PENDING_PAYMENT: '/last_pending_amount',
+            CREATE_LOG: '/create_log',
+            UPDATE_LOG: '/update_log',
+            DELETE_LOG: '/delete_log',
             GET_FILTERED_TRADER_FINANCE_LOGS: '/filtered_logs',
             GET_TRADER_WISE_PENDING_PAYMENTS: '/trader_wise_pending_payment'
         },

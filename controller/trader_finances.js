@@ -11,16 +11,5 @@ const configListsController = {
             response.status(NOT_FOUND).json({ message: messageBundle['unsuccessful'] });
         }
     },
-    async updateTotalCostPrice(request, response) {
-        let traderName = request.body.traderName;
-        let costPrice = request.body.costPrice;
-        let update = await TraderFinancesOperations.updateTotalCostPrice(traderName, costPrice);
-        if (update.modifiedCount == 1) {
-            response.status(SUCCESS).json({ 'status': true });
-        }
-        else {
-            response.status(NOT_FOUND).json({ message: messageBundle['unsuccessful'] });
-        }
-    },
 }
 module.exports = configListsController;

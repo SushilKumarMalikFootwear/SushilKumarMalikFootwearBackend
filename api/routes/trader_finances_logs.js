@@ -1,26 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const {
-    getPendingBills,
-    saveTraderFinanceLog,
-    decreasePendingAmountById,
-    getLastRunningPendingPayment,
+    createLog,
+    updateLog,
+    deleteLog,
     getFilteredTraderFinanceLogs,
     getTraderWisePendingPayments,
 } = require("../../controller/trader_finances_logs");
 
 const {
-    GET_PENDING_BILLS,
-    SAVE_TRADER_FINANCE_LOG,
-    DECREASE_PENDING_AMOUNT,
-    GET_LAST_RUNNING_PENDING_PAYMENT,
+    CREATE_LOG,
+    UPDATE_LOG,
+    DELETE_LOG,
     GET_FILTERED_TRADER_FINANCE_LOGS,
     GET_TRADER_WISE_PENDING_PAYMENTS,
 } = require("../../utils/config").ROUTES.TRADER_FINANCES_LOGS;
-router.get(GET_PENDING_BILLS, getPendingBills);
-router.post(SAVE_TRADER_FINANCE_LOG, saveTraderFinanceLog);
-router.post(DECREASE_PENDING_AMOUNT, decreasePendingAmountById);
-router.get(GET_LAST_RUNNING_PENDING_PAYMENT, getLastRunningPendingPayment);
+router.post(CREATE_LOG, createLog);
+router.post(UPDATE_LOG, updateLog);
+router.post(DELETE_LOG, deleteLog);
 router.post(GET_FILTERED_TRADER_FINANCE_LOGS, getFilteredTraderFinanceLogs);
 router.get(GET_TRADER_WISE_PENDING_PAYMENTS, getTraderWisePendingPayments);
 

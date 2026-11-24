@@ -9,4 +9,5 @@ module.exports = {
     "delete.unsuccessful":"Delete Unsuccessful",
     "successful":"successful",
     "unsuccessful":"Oops Something went wrong",
+    "server.crash":"Something went wrong on the server",
 }
