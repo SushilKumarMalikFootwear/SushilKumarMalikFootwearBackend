@@ -3,9 +3,20 @@ const { SUCCESS, SERVER_CRASH, NOT_FOUND } =
 const uniqid = require("uniqid");
 const messageBundle = require("../locales/en");
 const productOperations = require("../db/services/product_crud");
+const { websiteUpdateFromBody } = require("../utils/website_fields");
 const productController = {
   add(request, response) {
     let footwearObject = request.body;
+    try {
+      // Validate website fields and replace raw values with cleaned ones.
+      const { $set } = websiteUpdateFromBody(footwearObject);
+      for (const key of ["show_on_website", "group_key", "website_price", "website_media", "tags"]) {
+        delete footwearObject[key];
+      }
+      Object.assign(footwearObject, $set);
+    } catch (err) {
+      return response.status(err.status || 400).json({ message: err.message });
+    }
     footwearObject.footwear_id = uniqid(
       footwearObject.category.split(" ").join("_")
     );
@@ -106,6 +117,30 @@ const productController = {
         .json({ message: messageBundle["unsuccessful"], ERROR: err });
     }
   },
+  async get_all_group_keys(request, response) {
+    try {
+      const groupKeys = await productOperations.get_all_group_keys();
+      response.status(SUCCESS).json({ group_keys: groupKeys });
+    } catch (err) {
+      response.status(SERVER_CRASH).json({ message: messageBundle["unsuccessful"] });
+    }
+  },
+  async get_all_tags(request, response) {
+    try {
+      const { DEFAULT_TAGS } = require("../utils/website_config");
+      const used = await productOperations.get_all_tags();
+      const seen = new Set();
+      const tags = [...DEFAULT_TAGS, ...used].filter((t) => {
+        const k = t.toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      response.status(SUCCESS).json({ tags });
+    } catch (err) {
+      response.status(SERVER_CRASH).json({ message: messageBundle["unsuccessful"] });
+    }
+  },
   async update_product(request, response) {
     try {
       let footwear_id = request.body.footwear_id;
@@ -130,21 +165,30 @@ const productController = {
         size_description: request.body.size_description,
         new_images: request.body.new_images
       };
+      let websiteUpdate;
+      try {
+        websiteUpdate = websiteUpdateFromBody(request.body);
+      } catch (err) {
+        return response.status(err.status || 400).json({ message: err.message });
+      }
       let product = await productOperations.update_product(
         footwear_id,
-        footwearObject
+        footwearObject,
+        websiteUpdate
       );
-      if (product.modifiedCount && footwearObject) {
+      if (websiteUpdate.$set.show_on_website === true) {
+        await productOperations.mark_first_shown_on_website(footwear_id);
+      }
+      if (product && product.matchedCount) {
         response.status(SUCCESS).json({
           message: messageBundle["update.successful"],
           Product: footwearObject,
         });
-        if (product.modifiedCount) {
-        } else {
-          response
-            .status(NOT_FOUND)
-            .json({ message: messageBundle["update.unsuccessful"] });
-        }
+      } else {
+        // Previously no response was sent here, leaving the app waiting.
+        response
+          .status(NOT_FOUND)
+          .json({ message: messageBundle["update.unsuccessful"] });
       }
     } catch (err) {
       response
