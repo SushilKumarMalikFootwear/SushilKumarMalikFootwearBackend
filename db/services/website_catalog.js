@@ -2,8 +2,9 @@
 //
 // Rules (agreed with the owner):
 // - Only products with show_on_website = true are visible.
-// - Products sharing a group_key become ONE website product. Different colours
-//   become colour options; different size ranges of the same colour are merged
+// - Products sharing a group_key form one group (one article). Each colour of a
+//   group is its own card in the list; the product page shows the group's other
+//   colours as options. Different size ranges of the same colour are merged
 //   into one size list (each size keeps its own product's price).
 // - Price = website_price, or selling_price when website_price is empty.
 // - Stock is combined across both stores. Quantities are never exposed.
@@ -20,6 +21,8 @@ const InvoiceModel = require("../models/invoice");
 const cfg = require("../../utils/website_config");
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+// Card id = "<group id>--<colour>". slugify never makes "--", so it splits cleanly.
+const COLOUR_SEP = "--";
 
 // Fields read from the database. Anything not listed here can't leak.
 const SAFE_PROJECTION = {
@@ -34,6 +37,7 @@ const SAFE_PROJECTION = {
   website_price: 1,
   pairs_in_stock: 1,
   size_range: 1,
+  size_description: 1,
   group_key: 1,
   website_media: 1,
   tags: 1,
@@ -65,6 +69,15 @@ function timeOf(value) {
   return Number.isFinite(t) ? t : 0;
 }
 
+// The owner marks each size range S, M or L (small, medium, large). Kids and
+// adult ranges can share numbers (kids 8-10 vs adult 7-10), so this mark sets
+// the order, not the numbers.
+const SIZE_TIER = { S: 0, M: 1, L: 2 };
+function sizeTier(product) {
+  const tier = SIZE_TIER[String(product.size_description || "").trim().toUpperCase()];
+  return tier === undefined ? 1 : tier;
+}
+
 function firstSizeNumber(product) {
   const first = (product.pairs_in_stock || [])[0];
   const n = first ? parseFloat(first.size) : NaN;
@@ -79,8 +92,10 @@ function titleCase(text) {
 }
 
 function buildColour(colourProducts) {
-  // Order size ranges by their first size (e.g. 6-9 before 10-11).
-  const products = [...colourProducts].sort((a, b) => firstSizeNumber(a) - firstSizeNumber(b));
+  // Order size ranges S, M, L; within the same mark, by first size (6-7 before 8-10).
+  const products = [...colourProducts].sort(
+    (a, b) => sizeTier(a) - sizeTier(b) || firstSizeNumber(a) - firstSizeNumber(b)
+  );
   const sizes = new Map(); // size -> entry, in display order
 
   for (const product of products) {
@@ -162,6 +177,7 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
       byColour.get(key).push(p);
     }
     const colours = [...byColour.values()].map(buildColour);
+    for (const c of colours) c.id = `${id}${COLOUR_SEP}${slugify(c.color) || "default"}`;
     // In-stock colours first, then the order they were added.
     colours.sort((a, b) => Number(b.in_stock) - Number(a.in_stock) || a._first_shown - b._first_shown);
 
@@ -197,7 +213,7 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
       price_min: mins.length ? Math.min(...mins) : null,
       price_max: maxs.length ? Math.max(...maxs) : null,
       mrp_max: mrps.length ? Math.max(...mrps) : null,
-      colors: colours.map(({ _first_shown, _created, ...c }) => c),
+      colors: colours,
       // Latest time a colour of this group went live (a new colour counts as new).
       _shown_at: Math.max(0, ...colours.map((c) => c._first_shown)),
       _created: Math.max(0, ...colours.map((c) => c._created)),
@@ -281,26 +297,68 @@ function queryCatalog(groups, query = {}) {
   return { total, page, limit, pages: Math.max(Math.ceil(total / limit), 1), items };
 }
 
-// Public shapes: strip internal fields.
-function toDetail(group) {
-  const { _shown_at, _created, _sold, ...pub } = group;
-  return pub;
+/**
+ * One list entry per colour of each group. Each entry has the shape of a group
+ * whose `colors` holds only that colour, so filters and sorting work per colour.
+ * A colour that went live recently sorts as new on its own.
+ */
+function colourCards(groups) {
+  const cards = [];
+  for (const g of groups) {
+    for (const c of g.colors) {
+      cards.push({
+        ...g,
+        id: c.id,
+        group_id: g.id,
+        in_stock: c.in_stock,
+        price_min: c.price_min,
+        price_max: c.price_max,
+        mrp_max: c.mrp_max,
+        colors: [c],
+        _group: g,
+        _shown_at: c._first_shown,
+        _created: c._created,
+      });
+    }
+  }
+  return cards;
 }
-function toCard(group) {
-  const d = toDetail(group);
-  return {
-    ...d,
-    colors: d.colors.map((c) => ({
-      color: c.color,
-      image: (c.media.find((m) => m.type === "image") || {}).url || null,
-      in_stock: c.in_stock,
-    })),
-  };
+
+/** Finds the group for a card id ("group--colour") or a plain group id. */
+function findProduct(groups, rawId) {
+  const id = String(rawId || "").toLowerCase();
+  const groupId = id.split(COLOUR_SEP)[0];
+  const group = groups.find((g) => g.id === groupId);
+  if (!group) return null;
+  const colour = group.colors.find((c) => c.id === id) || group.colors[0];
+  return { group, selected_color: colour.id };
+}
+
+// Public shapes: strip internal fields.
+function publicColour({ _first_shown, _created, ...c }) {
+  return c;
+}
+function toDetail(group) {
+  const { _shown_at, _created, _sold, _group, ...pub } = group;
+  return { ...pub, colors: pub.colors.map(publicColour) };
+}
+function toCard(card) {
+  const { _shown_at, _created, _sold, _group, ...pub } = card;
+  const selected = card.colors[0];
+  const all = _group ? _group.colors : card.colors;
+  const swatch = (c) => ({
+    id: c.id,
+    color: c.color,
+    image: (c.media.find((m) => m.type === "image") || {}).url || null,
+    in_stock: c.in_stock,
+  });
+  // This card's colour first, then the group's other colours.
+  return { ...pub, colors: [selected, ...all.filter((c) => c.id !== selected.id)].map(swatch) };
 }
 
 // ---- Loading (with a short in-memory cache) ----
 const CACHE_MS = 60 * 1000;
-let cache = { at: 0, groups: null };
+let cache = { at: 0, groups: null, cards: null };
 
 async function loadSalesByProductId(productIds, now) {
   if (!productIds.length) return {};
@@ -326,12 +384,18 @@ async function getCatalog({ fresh = false } = {}) {
   const products = await FootwearModel.find({ show_on_website: true }, SAFE_PROJECTION).lean();
   const sales = await loadSalesByProductId(products.map((p) => p.footwear_id).filter(Boolean), now);
   const groups = buildCatalog(products, sales, now);
-  cache = { at: now, groups };
+  cache = { at: now, groups, cards: colourCards(groups) };
   return groups;
 }
 
+/** Cached list entries, one per colour. */
+async function getCards(options) {
+  await getCatalog(options);
+  return cache.cards;
+}
+
 function clearCatalogCache() {
-  cache = { at: 0, groups: null };
+  cache = { at: 0, groups: null, cards: null };
 }
 
 function filtersFrom(groups) {
@@ -360,6 +424,9 @@ module.exports = {
   toCard,
   toDetail,
   getCatalog,
+  getCards,
+  colourCards,
+  findProduct,
   clearCatalogCache,
   filtersFrom,
   slugify,

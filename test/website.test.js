@@ -109,29 +109,39 @@ after(async () => {
   if (mongo) await mongo.stop();
 });
 
-test("product list groups variants, hides internal fields, sorts out-of-stock last", async () => {
+test("product list shows one card per colour, hides internal fields, sorts out-of-stock last", async () => {
   const { status, json, text } = await call("GET", "/public/products");
   assert.equal(status, 200);
   for (const secret of ["cost_price", "SECRET-VENDOR", "444", "internal note", "internal-label", "red_hidden", "quantity"]) {
     assert.ok(!text.includes(secret), `response leaked ${secret}`);
   }
-  assert.equal(json.total, 2);
-  const [first, second] = json.items;
-  assert.equal(first.id, "comfort-7712");
-  assert.equal(first.name, "Comfort 7712");
-  assert.equal(first.in_stock, true);
-  assert.equal(first.price_min, 799);
-  assert.equal(first.price_max, 899);
-  assert.deepEqual(first.colors.map((c) => c.color), ["Black", "Navy"]);
-  assert.equal(first.colors[0].image, "https://utfs.io/f/black1.jpg");
-  assert.ok(first.tags.includes("Super soft"));
-  assert.equal(second.id, "kids-flex");
-  assert.equal(second.in_stock, false);
+  // Comfort 7712 has two colours, so two cards; newest colour first, out of stock last.
+  assert.equal(json.total, 3);
+  const [navy, black, flex] = json.items;
+  assert.equal(navy.id, "comfort-7712--navy");
+  assert.equal(navy.group_id, "comfort-7712");
+  assert.equal(navy.price_min, 850);
+  assert.deepEqual(navy.colors.map((c) => c.color), ["Navy", "Black"], "own colour first, then the others");
+  assert.equal(black.id, "comfort-7712--black");
+  assert.equal(black.name, "Comfort 7712");
+  assert.equal(black.in_stock, true);
+  assert.equal(black.price_min, 799);
+  assert.equal(black.price_max, 899, "both size ranges of black are one card");
+  assert.deepEqual(black.colors.map((c) => c.color), ["Black", "Navy"]);
+  assert.equal(black.colors[0].image, "https://utfs.io/f/black1.jpg");
+  assert.ok(black.tags.includes("Super soft"));
+  assert.equal(flex.id, "kids-flex--blue");
+  assert.equal(flex.in_stock, false);
 });
 
-test("product detail merges size ranges of the same colour", async () => {
-  const { status, json } = await call("GET", "/public/products/comfort-7712");
+test("product detail merges size ranges of the same colour and lists all colours", async () => {
+  const { status, json } = await call("GET", "/public/products/comfort-7712--navy");
   assert.equal(status, 200);
+  assert.equal(json.product.selected_color, "comfort-7712--navy");
+  assert.deepEqual(json.product.colors.map((c) => c.id), ["comfort-7712--black", "comfort-7712--navy"]);
+  // A plain group id still works and opens the first colour.
+  assert.equal((await call("GET", "/public/products/comfort-7712")).json.product.selected_color, "comfort-7712--black");
+  assert.ok(!JSON.stringify(json).includes("_first_shown"), "internal fields stripped");
   const black = json.product.colors.find((c) => c.color === "Black");
   assert.deepEqual(black.sizes.map((s) => s.size), ["6", "7", "8", "9", "10", "11"]);
   assert.deepEqual(black.sizes.map((s) => s.in_stock), [true, true, true, false, true, true]);
@@ -147,8 +157,8 @@ test("product detail merges size ranges of the same colour", async () => {
 
 test("automatic tags: top selling ignores returns and old sales", async () => {
   const { json } = await call("GET", "/public/products");
-  const comfort = json.items.find((g) => g.id === "comfort-7712");
-  const flex = json.items.find((g) => g.id === "kids-flex");
+  const comfort = json.items.find((g) => g.group_id === "comfort-7712");
+  const flex = json.items.find((g) => g.group_id === "kids-flex");
   assert.ok(flex.tags.includes("Top selling"));
   assert.ok(!comfort.tags.includes("Top selling"));
   // Only 2 groups exist, so both are inside the "at least 10" new-arrival queue.
@@ -162,8 +172,8 @@ test("filters and search", async () => {
   assert.equal((await call("GET", "/public/products?size=9")).json.total, 0);
   assert.equal((await call("GET", "/public/products?size=10")).json.total, 1);
   assert.equal((await call("GET", "/public/products?q=navy")).json.total, 1);
-  assert.equal((await call("GET", "/public/products?tag=super%20soft")).json.total, 1);
-  assert.equal((await call("GET", "/public/products?category=kids%20sports")).json.items[0].id, "kids-flex");
+  assert.equal((await call("GET", "/public/products?tag=super%20soft")).json.total, 2, "tags apply to every colour of the article");
+  assert.equal((await call("GET", "/public/products?category=kids%20sports")).json.items[0].id, "kids-flex--blue");
 });
 
 test("new arrival queue keeps at least 10 and includes everything from the last 30 days", () => {
@@ -186,6 +196,21 @@ test("new arrival queue keeps at least 10 and includes everything from the last 
   products.forEach((p) => { if (p.article === "11") p.group_key = "B 11"; });
   groups = catalog.buildCatalog(products, {}, now);
   assert.equal(groups.find((g) => g.id === "b-11").is_new_arrival, true);
+});
+
+test("size ranges of a colour are ordered S, M, L, then by first size", () => {
+  const make = (id, desc, sizes) => ({
+    footwear_id: id, brand: "Combit", article: "SS-1", group_key: "COMBIT SS-1", color: "black",
+    selling_price: 100, show_on_website: true, size_description: desc,
+    pairs_in_stock: sizes.map((size) => ({ size, available_at: "HOME", quantity: 1 })),
+  });
+  const [group] = catalog.buildCatalog([
+    make("adult", "L", ["7", "8"]),
+    make("youth", "M", ["1", "2"]),
+    make("kids", "S", ["11", "12", "13"]),
+    make("baby", "S", ["6"]),
+  ]);
+  assert.deepEqual(group.colors[0].sizes.map((s) => s.size), ["6", "11", "12", "13", "1", "2", "7", "8"]);
 });
 
 test("guest order uses database prices and builds a WhatsApp link", async () => {

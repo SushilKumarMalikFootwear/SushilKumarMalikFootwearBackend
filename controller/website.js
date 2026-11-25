@@ -6,8 +6,8 @@ module.exports = {
   // GET /public/products?category=&tag=&size=&q=&min_price=&max_price=&sort=&page=&limit=
   async listProducts(req, res, next) {
     try {
-      const groups = await catalog.getCatalog();
-      const result = catalog.queryCatalog(groups, req.query);
+      const cards = await catalog.getCards();
+      const result = catalog.queryCatalog(cards, req.query);
       res.set("Cache-Control", "public, max-age=60");
       res.json({ ...result, items: result.items.map(catalog.toCard) });
     } catch (err) {
@@ -15,14 +15,14 @@ module.exports = {
     }
   },
 
-  // GET /public/products/:id
+  // GET /public/products/:id   (id = "<group>--<colour>" from a card, or a group id)
   async getProduct(req, res, next) {
     try {
       const groups = await catalog.getCatalog();
-      const group = groups.find((g) => g.id === String(req.params.id).toLowerCase());
-      if (!group) return res.status(404).json({ message: "This product is not available." });
+      const found = catalog.findProduct(groups, req.params.id);
+      if (!found) return res.status(404).json({ message: "This product is not available." });
       res.set("Cache-Control", "public, max-age=60");
-      res.json({ product: catalog.toDetail(group) });
+      res.json({ product: { ...catalog.toDetail(found.group), selected_color: found.selected_color } });
     } catch (err) {
       next(err);
     }
