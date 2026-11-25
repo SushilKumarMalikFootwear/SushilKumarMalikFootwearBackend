@@ -83,10 +83,17 @@ before(async () => {
     { ...secret, footwear_id: "red_hidden", brand: "Comfort", article: "7712", category: "Men Casual", color: "Red",
       mrp: 1299, selling_price: 850, group_key: "Comfort 7712", show_on_website: false,
       pairs_in_stock: pairs({ 6: [5, 5] }) },
-    // Ungrouped, out of stock.
+    // Same group, switched on, but no stock: this colour must be hidden.
+    { ...secret, footwear_id: "white_empty", brand: "Comfort", article: "7712", category: "Men Casual", color: "White",
+      mrp: 1299, selling_price: 850, group_key: "Comfort 7712", show_on_website: true,
+      pairs_in_stock: pairs({ 8: [0, 0] }) },
+    // Ungrouped, in stock (size 1 only).
     { ...secret, footwear_id: "kids_flex", brand: "Flex", article: "2210", category: "Kids Sports", color: "Blue",
       mrp: 999, selling_price: 649, show_on_website: true, website_first_shown_at: new Date(now - 60 * DAY),
-      pairs_in_stock: pairs({ 1: [0, 0], 2: [0, 0] }) },
+      pairs_in_stock: pairs({ 1: [1, 0], 2: [0, 0] }) },
+    // Ungrouped, switched on, nothing in stock: the whole article must be hidden.
+    { ...secret, footwear_id: "gone", brand: "Gone", article: "1", category: "Ladies", color: "Red",
+      mrp: 999, selling_price: 649, show_on_website: true, pairs_in_stock: pairs({ 5: [0, 0] }) },
   ]);
   await InvoiceModel.create([
     { product_id: "kids_flex", invoice_date: new Date(now - 3 * DAY), invoice_status: "COMPLETED" },
@@ -109,13 +116,14 @@ after(async () => {
   if (mongo) await mongo.stop();
 });
 
-test("product list shows one card per colour, hides internal fields, sorts out-of-stock last", async () => {
+test("product list shows one card per in-stock colour and hides internal fields", async () => {
   const { status, json, text } = await call("GET", "/public/products");
   assert.equal(status, 200);
   for (const secret of ["cost_price", "SECRET-VENDOR", "444", "internal note", "internal-label", "red_hidden", "quantity"]) {
     assert.ok(!text.includes(secret), `response leaked ${secret}`);
   }
-  // Comfort 7712 has two colours, so two cards; newest colour first, out of stock last.
+  // Comfort 7712 has two in-stock colours, so two cards (White has no stock); newest first.
+  // "Gone" has no stock at all, so it is not listed.
   assert.equal(json.total, 3);
   const [navy, black, flex] = json.items;
   assert.equal(navy.id, "comfort-7712--navy");
@@ -131,7 +139,10 @@ test("product list shows one card per colour, hides internal fields, sorts out-o
   assert.equal(black.colors[0].image, "https://utfs.io/f/black1.jpg");
   assert.ok(black.tags.includes("Super soft"));
   assert.equal(flex.id, "kids-flex--blue");
-  assert.equal(flex.in_stock, false);
+  assert.equal(flex.in_stock, true);
+  assert.ok(!json.items.some((c) => c.id.includes("white") || c.id.startsWith("gone")), "out of stock is hidden");
+  assert.deepEqual(navy.colors.map((c) => c.color), ["Navy", "Black"], "sold-out colour not offered");
+  assert.equal((await call("GET", "/public/products/gone")).status, 404);
 });
 
 test("product detail merges size ranges of the same colour and lists all colours", async () => {
@@ -168,7 +179,7 @@ test("automatic tags: top selling ignores returns and old sales", async () => {
 test("filters and search", async () => {
   const f = (await call("GET", "/public/filters")).json;
   assert.deepEqual(f.categories, ["Kids Sports", "Men Casual"]);
-  assert.deepEqual(f.sizes, ["6", "7", "8", "10", "11"]);
+  assert.deepEqual(f.sizes, ["1", "6", "7", "8", "10", "11"]);
   assert.equal((await call("GET", "/public/products?size=9")).json.total, 0);
   assert.equal((await call("GET", "/public/products?size=10")).json.total, 1);
   assert.equal((await call("GET", "/public/products?q=navy")).json.total, 1);

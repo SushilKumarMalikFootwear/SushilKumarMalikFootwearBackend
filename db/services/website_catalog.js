@@ -8,7 +8,9 @@
 //   into one size list (each size keeps its own product's price).
 // - Price = website_price, or selling_price when website_price is empty.
 // - Stock is combined across both stores. Quantities are never exposed.
-// - Out-of-stock products are still listed, but always after in-stock ones.
+// - Out of stock is hidden (owner, 2026-11-25): a colour with no stock in either
+//   store is not shown, and an article with no colour in stock is not shown.
+//   They come back by themselves when stock is added.
 // - "New arrival": groups first shown in the last 30 days; if fewer than 10,
 //   the 10 most recently shown groups. A new colour re-triggers the group.
 // - "Top selling": top 10 groups by pairs sold in the last 30 days.
@@ -176,7 +178,8 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
       if (!byColour.has(key)) byColour.set(key, []);
       byColour.get(key).push(p);
     }
-    const colours = [...byColour.values()].map(buildColour);
+    const colours = [...byColour.values()].map(buildColour).filter((c) => c.in_stock);
+    if (!colours.length) continue; // nothing in stock: hide the whole article
     for (const c of colours) c.id = `${id}${COLOUR_SEP}${slugify(c.color) || "default"}`;
     // In-stock colours first, then the order they were added.
     colours.sort((a, b) => Number(b.in_stock) - Number(a.in_stock) || a._first_shown - b._first_shown);
