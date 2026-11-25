@@ -71,7 +71,7 @@ before(async () => {
       website_first_shown_at: new Date(now - 5 * DAY), tags: ["Super soft"],
       website_media: [{ type: "image", url: "https://utfs.io/f/black1.jpg" }],
       pairs_in_stock: pairs({ 6: [1, 0], 7: [0, 2], 8: [1, 1], 9: [0, 0] }) },
-    { ...secret, footwear_id: "black_hi", brand: "Comfort", article: "7712", category: "Men Casual", color: "Black",
+    { ...secret, footwear_id: "black_hi", brand: "Comfort", article: "7712 10X11", category: "Men Casual", color: "Black.",
       mrp: 1399, selling_price: 950, website_price: 899, group_key: "comfort 7712", show_on_website: true,
       website_first_shown_at: new Date(now - 5 * DAY),
       website_media: [{ type: "image", url: "https://utfs.io/f/black1.jpg" }, { type: "image", url: "https://utfs.io/f/black2.jpg" }],
@@ -131,7 +131,7 @@ test("product list shows one card per in-stock colour and hides internal fields"
   assert.equal(navy.price_min, 850);
   assert.deepEqual(navy.colors.map((c) => c.color), ["Navy", "Black"], "own colour first, then the others");
   assert.equal(black.id, "comfort-7712--black");
-  assert.equal(black.name, "Comfort 7712");
+  assert.equal(black.name, "Comfort 7712", "group name, not one product's article");
   assert.equal(black.in_stock, true);
   assert.equal(black.price_min, 799);
   assert.equal(black.price_max, 899, "both size ranges of black are one card");
@@ -336,11 +336,18 @@ test("saving a product from the app handles website fields and the first-shown d
   doc = await FootwearModel.findOne({ footwear_id: "red_hidden" }).lean();
   assert.equal(doc.website_first_shown_at.getTime(), firstShown.getTime());
 
+  // Changing the first photo is saved; an empty second slot is dropped.
+  await call("POST", "/update_product", { ...base, newImages: ["https://utfs.io/f/old1.jpg", "https://utfs.io/f/old2.jpg"] });
+  await call("POST", "/update_product", { ...base, newImages: ["https://utfs.io/f/new1.jpg", null] });
+  doc = await FootwearModel.findOne({ footwear_id: "red_hidden" }).lean();
+  assert.deepEqual(doc.newImages, ["https://utfs.io/f/new1.jpg"]);
+
   // An older app version that doesn't send website fields leaves them alone.
   await call("POST", "/update_product", { ...base });
   doc = await FootwearModel.findOne({ footwear_id: "red_hidden" }).lean();
   assert.equal(doc.show_on_website, true);
   assert.equal(doc.website_price, 749);
+  assert.deepEqual(doc.newImages, ["https://utfs.io/f/new1.jpg"], "photos kept when not sent");
 
   // Clearing the website price falls back to the selling price.
   await call("POST", "/update_product", { ...base, website_price: "" });

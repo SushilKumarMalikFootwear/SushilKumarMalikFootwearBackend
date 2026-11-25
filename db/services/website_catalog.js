@@ -60,6 +60,18 @@ function groupIdOf(product) {
   return slugify(product.group_key) || slugify(product.footwear_id);
 }
 
+/** The group key most products in the group use, e.g. "MAXIMA POWER-04". */
+function groupName(products) {
+  const counts = new Map();
+  for (const p of products) {
+    const key = String(p.group_key || "").trim();
+    if (key) counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  let best = "";
+  for (const [key, n] of counts) if (!best || n > counts.get(best)) best = key;
+  return best;
+}
+
 function priceOf(product) {
   const wp = Number(product.website_price);
   if (Number.isFinite(wp) && wp > 0) return wp;
@@ -174,7 +186,8 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
   for (const [id, groupProducts] of byGroup) {
     const byColour = new Map();
     for (const p of groupProducts) {
-      const key = String(p.color || "").trim().toLowerCase() || "default";
+      // Dots, slashes and spaces don't matter: "L.PINK" and "L/PINK" are one colour.
+      const key = String(p.color || "").toLowerCase().replace(/[^a-z0-9]/g, "") || "default";
       if (!byColour.has(key)) byColour.set(key, []);
       byColour.get(key).push(p);
     }
@@ -207,7 +220,8 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
 
     groups.push({
       id,
-      name: [latest.brand, latest.article].filter(Boolean).join(" ").trim() || "Footwear",
+      // Grouped: the group's name (articles often carry a size, e.g. "POWER-04 2X5").
+      name: groupName(groupProducts) || [latest.brand, latest.article].filter(Boolean).join(" ").trim() || "Footwear",
       brand: latest.brand || "",
       article: latest.article || "",
       category: latest.category || "",

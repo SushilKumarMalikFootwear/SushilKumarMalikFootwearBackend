@@ -163,7 +163,8 @@ const productController = {
         rating: request.body.rating,
         update: request.body.update,
         size_description: request.body.size_description,
-        new_images: request.body.new_images
+        // The app sends its photos as "newImages" (first photo, second photo).
+        newImages: request.body.newImages,
       };
       let websiteUpdate;
       try {

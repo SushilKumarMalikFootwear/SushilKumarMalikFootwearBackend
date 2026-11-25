@@ -1,5 +1,12 @@
 const FootwearModel = require("../models/footwear");
 
+/** { newImages: [...] } from the app's photo list (empty slots dropped), or {} if none. */
+function photosUpdate(newImages) {
+  if (!Array.isArray(newImages)) return {};
+  const urls = newImages.filter((u) => typeof u === "string" && u.trim()).map((u) => u.trim());
+  return urls.length ? { newImages: urls } : {};
+}
+
 module.exports = {
   async applyChanges() {
     // let trader_finances = {};
@@ -310,7 +317,8 @@ module.exports = {
             rating: footwearObject.rating,
             updated: footwearObject.updated,
             size_description: footwearObject.size_description,
-            new_images: footwearObject.new_images
+            // Photos: only when the app sent at least one, so a missing field never wipes them.
+            ...photosUpdate(footwearObject.newImages),
           },
         }
       );
