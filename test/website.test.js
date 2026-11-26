@@ -159,6 +159,10 @@ test("product detail merges size ranges of the same colour and lists all colours
   assert.equal(black.sizes.find((s) => s.size === "8").price, 799);
   assert.equal(black.sizes.find((s) => s.size === "10").price, 899);
   assert.equal(black.sizes.find((s) => s.size === "10").mrp, 1399);
+  // Lowest price (799) is paired with the MRP of its own size range (1299), not the highest MRP.
+  assert.equal(black.price_min, 799);
+  assert.equal(black.price_min_mrp, 1299);
+  assert.deepEqual([black.mrp_min, black.mrp_max], [1299, 1399]);
   assert.deepEqual(black.media.map((m) => m.url), ["https://utfs.io/f/black1.jpg", "https://utfs.io/f/black2.jpg"]);
   const navy = json.product.colors.find((c) => c.color === "Navy");
   assert.equal(navy.sizes[0].price, 850, "falls back to selling price");

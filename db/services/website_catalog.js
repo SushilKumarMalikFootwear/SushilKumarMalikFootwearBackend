@@ -142,6 +142,8 @@ function buildColour(colourProducts) {
   const priced = inStockSizes.length ? inStockSizes : sizeList;
   const prices = priced.map((s) => s.price).filter((p) => p > 0);
   const mrps = priced.map((s) => s.mrp).filter((m) => m > 0);
+  // The cheapest size range and its own MRP, so "% off" compares like with like.
+  const cheapest = priced.filter((s) => s.price > 0).sort((a, b) => a.price - b.price)[0];
 
   const media = [];
   const seen = new Set();
@@ -162,7 +164,9 @@ function buildColour(colourProducts) {
     in_stock: inStockSizes.length > 0,
     price_min: prices.length ? Math.min(...prices) : null,
     price_max: prices.length ? Math.max(...prices) : null,
+    mrp_min: mrps.length ? Math.min(...mrps) : null,
     mrp_max: mrps.length ? Math.max(...mrps) : null,
+    price_min_mrp: (cheapest && cheapest.mrp) || null,
     // A colour counts as "shown" from when its first product went live.
     _first_shown: shownTimes.length ? Math.min(...shownTimes) : 0,
     _created: Math.max(0, ...products.map((p) => timeOf(p.createdAt))),
@@ -216,6 +220,8 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
     const mins = priced.map((c) => c.price_min).filter((v) => v != null);
     const maxs = priced.map((c) => c.price_max).filter((v) => v != null);
     const mrps = priced.map((c) => c.mrp_max).filter((v) => v != null);
+    const mrpMins = priced.map((c) => c.mrp_min).filter((v) => v != null);
+    const cheapestColour = priced.filter((c) => c.price_min != null).sort((a, b) => a.price_min - b.price_min)[0];
 
     groups.push({
       id,
@@ -228,7 +234,9 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
       in_stock: live.length > 0,
       price_min: mins.length ? Math.min(...mins) : null,
       price_max: maxs.length ? Math.max(...maxs) : null,
+      mrp_min: mrpMins.length ? Math.min(...mrpMins) : null,
       mrp_max: mrps.length ? Math.max(...mrps) : null,
+      price_min_mrp: cheapestColour ? cheapestColour.price_min_mrp : null,
       colors: colours,
       // Latest time a colour of this group went live (a new colour counts as new).
       _shown_at: Math.max(0, ...colours.map((c) => c._first_shown)),
@@ -329,7 +337,9 @@ function colourCards(groups) {
         in_stock: c.in_stock,
         price_min: c.price_min,
         price_max: c.price_max,
+        mrp_min: c.mrp_min,
         mrp_max: c.mrp_max,
+        price_min_mrp: c.price_min_mrp,
         colors: [c],
         _group: g,
         _shown_at: c._first_shown,
