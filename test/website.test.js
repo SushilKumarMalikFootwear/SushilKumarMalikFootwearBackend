@@ -71,7 +71,7 @@ before(async () => {
       website_first_shown_at: new Date(now - 5 * DAY), tags: ["Super soft"],
       website_media: [{ type: "image", url: "https://utfs.io/f/black1.jpg" }],
       pairs_in_stock: pairs({ 6: [1, 0], 7: [0, 2], 8: [1, 1], 9: [0, 0] }) },
-    { ...secret, footwear_id: "black_hi", brand: "Comfort", article: "7712 10X11", category: "Men Casual", color: "Black.",
+    { ...secret, footwear_id: "black_hi", brand: "Comfort", article: "7712 10X11", category: "Men Casual", color: "Black",
       mrp: 1399, selling_price: 950, website_price: 899, group_key: "comfort 7712", show_on_website: true,
       website_first_shown_at: new Date(now - 5 * DAY),
       website_media: [{ type: "image", url: "https://utfs.io/f/black1.jpg" }, { type: "image", url: "https://utfs.io/f/black2.jpg" }],

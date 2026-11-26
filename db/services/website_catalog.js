@@ -186,8 +186,7 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
   for (const [id, groupProducts] of byGroup) {
     const byColour = new Map();
     for (const p of groupProducts) {
-      // Dots, slashes and spaces don't matter: "L.PINK" and "L/PINK" are one colour.
-      const key = String(p.color || "").toLowerCase().replace(/[^a-z0-9]/g, "") || "default";
+      const key = String(p.color || "").trim().toLowerCase() || "default";
       if (!byColour.has(key)) byColour.set(key, []);
       byColour.get(key).push(p);
     }
