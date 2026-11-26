@@ -3,7 +3,7 @@ const orders = require("../db/services/website_orders");
 const cfg = require("../utils/website_config");
 
 module.exports = {
-  // GET /public/products?category=&tag=&size=&q=&min_price=&max_price=&sort=&page=&limit=
+  // GET /public/products?category=&tag=&age=&size=&q=&min_price=&max_price=&sort=&page=&limit=
   async listProducts(req, res, next) {
     try {
       const cards = await catalog.getCards();
@@ -46,8 +46,8 @@ module.exports = {
       name: cfg.SHOP_NAME,
       whatsapp: process.env.WHATSAPP_NUMBER,
       stores: [
-        { name: "N.D. Footwear (Home store)", map_url: "https://maps.app.goo.gl/u9RsuT267dCJCDCW6", lat: 28.4516267, lng: 77.0204276, hours: null },
-        { name: "N.D. Footwear (Sadar Bazar)", map_url: "https://maps.app.goo.gl/RELcQ5tM9S5GGYYY6", lat: 28.4605432, lng: 77.0284808, hours: null },
+        { name: "N.D. Footwear (Home store)", map_url: "https://maps.app.goo.gl/u9RsuT267dCJCDCW6", lat: 28.4516267, lng: 77.0204276, hours: "Open every day, 4:30 pm – 9:30 pm" },
+        { name: "N.D. Footwear (Sadar Bazar)", map_url: "https://maps.app.goo.gl/RELcQ5tM9S5GGYYY6", lat: 28.4605432, lng: 77.0284808, hours: "Saturday, Sunday and national holidays, 11:00 am – 9:30 pm" },
       ],
       delivery: "Local delivery first. Parcel or Porter for other areas.",
     });

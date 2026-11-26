@@ -13,6 +13,25 @@ module.exports = {
   TOP_SELLING_DAYS: 30,
   TOP_SELLING_COUNT: 10,
 
+  // Age guide for children's footwear (owner, 2026-11-26). A product's age group
+  // comes from its size range; see ageGroupsOf in db/services/website_catalog.js.
+  AGE_GROUPS: [
+    { id: "0-8m", label: "0 – 8 months" }, // only set on products by hand (age_group), e.g. baby booties
+    { id: "10m-2y", label: "10 months – 2 years" }, // 14x20/21, and small 3x6
+    { id: "2-5y", label: "2.5 – 5.5 years" }, // 6x11
+    { id: "6-14y", label: "6 – 14 years" }, // 11x5
+  ],
+  // Only these categories get an age group (adult sizes reuse the same numbers).
+  AGE_CATEGORIES: [
+    "Child Chappal",
+    "Child Crocs",
+    "Child Sandal",
+    "Child Sports Shoes",
+    "Girl's Fancy Belly",
+    "Girl's Fancy Sandal",
+    "School Shoes",
+  ],
+
   // Orders
   ORDER_STATUSES: ["NEW", "CONFIRMED", "DELIVERED", "CANCELLED"],
   MAX_ORDER_ITEMS: 20,

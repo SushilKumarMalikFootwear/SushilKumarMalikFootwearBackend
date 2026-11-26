@@ -52,6 +52,10 @@ const footwearSchema = new Schema(
     // Set by the server the first time show_on_website is switched on, and
     // never changed afterwards. Drives the "New arrival" tag.
     website_first_shown_at: { type: SchemaTypes.Date },
+    // Age group for the website's age guide when the size range can't tell it
+    // (e.g. a baby booty in size 1): an id from AGE_GROUPS in
+    // utils/website_config.js, or "none" for no age. Empty = worked out from sizes.
+    age_group: { type: SchemaTypes.String, trim: true },
   },
   {
     timestamps: true, //this will add time in data object when the  is created in database

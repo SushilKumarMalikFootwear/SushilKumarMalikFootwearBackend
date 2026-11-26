@@ -14,6 +14,8 @@
 // - "New arrival": groups first shown in the last 30 days; if fewer than 10,
 //   the 10 most recently shown groups. A new colour re-triggers the group.
 // - "Top selling": top 10 groups by pairs sold in the last 30 days.
+// - Age guide (children's categories only): each size carries the age group of
+//   its size range (see ageGroupsOf); the shop can filter by it.
 //
 // Cost price, vendor, internal labels, descriptions and invoices never leave
 // this file.
@@ -40,6 +42,7 @@ const SAFE_PROJECTION = {
   pairs_in_stock: 1,
   size_range: 1,
   size_description: 1,
+  age_group: 1,
   group_key: 1,
   website_media: 1,
   tags: 1,
@@ -98,6 +101,43 @@ function firstSizeNumber(product) {
   return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
 }
 
+const AGE_CATEGORY_SET = new Set(cfg.AGE_CATEGORIES.map((c) => c.toLowerCase()));
+const AGE_ORDER = cfg.AGE_GROUPS.map((a) => a.id);
+const AGE_LABEL = new Map(cfg.AGE_GROUPS.map((a) => [a.id, a.label]));
+const [, AGE_BABY, AGE_KIDS, AGE_JUNIOR] = AGE_ORDER;
+
+/**
+ * Age groups for a product, from its size range (owner's table):
+ *   14x20 / 14x21, and a small (S) 3x6  -> 10 months – 2 years
+ *   6x11                                -> 2.5 – 5.5 years
+ *   11x5 (11, 12, 13, 1 ... 5)          -> 6 – 14 years
+ * A range across both of the last two (e.g. 9x1) gets both. Anything else gets none.
+ * An age_group saved on the product wins ("none" = no age).
+ */
+function ageGroupsOf(product) {
+  const saved = String(product.age_group || "").trim();
+  if (saved) return AGE_LABEL.has(saved) ? [saved] : [];
+  if (!AGE_CATEGORY_SET.has(String(product.category || "").trim().toLowerCase())) return [];
+  const nums = (product.pairs_in_stock || []).map((p) => parseFloat(p.size)).filter(Number.isFinite);
+  if (!nums.length) return [];
+  const all = (test) => nums.every(test);
+  const small = String(product.size_description || "").trim().toUpperCase() === "S";
+  const kids = (n) => n >= 5 && n <= 11;
+  const junior = (n) => (n >= 11 && n <= 13) || (n >= 1 && n <= 5);
+  if (all((n) => n >= 14 && n <= 21)) return [AGE_BABY];
+  if (small && all((n) => n >= 2 && n <= 6)) return [AGE_BABY];
+  if (all(kids)) return [AGE_KIDS];
+  if (all(junior)) return [AGE_JUNIOR];
+  if (all((n) => kids(n) || junior(n))) return [AGE_KIDS, AGE_JUNIOR];
+  return [];
+}
+
+/** Age ids present in a list of sizes, in the configured order, with labels. */
+function ageGroupsIn(sizes) {
+  const ids = new Set(sizes.filter((s) => s.in_stock).flatMap((s) => s.ages));
+  return AGE_ORDER.filter((id) => ids.has(id)).map((id) => ({ id, label: AGE_LABEL.get(id) }));
+}
+
 function titleCase(text) {
   return String(text || "")
     .trim()
@@ -115,6 +155,7 @@ function buildColour(colourProducts) {
   for (const product of products) {
     const price = priceOf(product);
     const mrp = Number(product.mrp) || null;
+    const ages = ageGroupsOf(product);
     // Combine both stores: a size is in stock if any store has it.
     const perSize = new Map();
     for (const pair of product.pairs_in_stock || []) {
@@ -124,7 +165,7 @@ function buildColour(colourProducts) {
       perSize.set(size, (perSize.get(size) || 0) + Math.max(qty, 0));
     }
     for (const [size, qty] of perSize) {
-      const candidate = { size, in_stock: qty > 0, price, mrp, sku: product.footwear_id };
+      const candidate = { size, in_stock: qty > 0, price, mrp, sku: product.footwear_id, ages };
       const existing = sizes.get(size);
       // Two size ranges overlap on a size: prefer the one in stock, then the cheaper one.
       if (
@@ -155,6 +196,7 @@ function buildColour(colourProducts) {
     }
   }
 
+  const categories = [...new Set(products.map((p) => String(p.category || "").trim()).filter(Boolean))];
   const shownTimes = products.map((p) => timeOf(p.website_first_shown_at) || timeOf(p.createdAt)).filter(Boolean);
 
   return {
@@ -167,6 +209,9 @@ function buildColour(colourProducts) {
     mrp_min: mrps.length ? Math.min(...mrps) : null,
     mrp_max: mrps.length ? Math.max(...mrps) : null,
     price_min_mrp: (cheapest && cheapest.mrp) || null,
+    age_groups: ageGroupsIn(sizeList),
+    // Every category this colour's products are in (an article can mix child and adult sizes).
+    _categories: categories,
     // A colour counts as "shown" from when its first product went live.
     _first_shown: shownTimes.length ? Math.min(...shownTimes) : 0,
     _created: Math.max(0, ...products.map((p) => timeOf(p.createdAt))),
@@ -237,6 +282,7 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
       mrp_min: mrpMins.length ? Math.min(...mrpMins) : null,
       mrp_max: mrps.length ? Math.max(...mrps) : null,
       price_min_mrp: cheapestColour ? cheapestColour.price_min_mrp : null,
+      age_groups: ageGroupsIn(colours.flatMap((c) => c.sizes)),
       colors: colours,
       // Latest time a colour of this group went live (a new colour counts as new).
       _shown_at: Math.max(0, ...colours.map((c) => c._first_shown)),
@@ -246,7 +292,24 @@ function buildCatalog(products, salesByProductId = {}, now = Date.now()) {
   }
 
   applyAutoTags(groups, now);
+  assignSlugs(groups);
   return groups;
+}
+
+/**
+ * Readable link name for each colour, used in the website address:
+ * "kats-supreme-18--purple" becomes "kats-supreme-18-purple". If two colours
+ * would get the same one, the later keeps its full id, so every slug is unique.
+ */
+function assignSlugs(groups) {
+  const seen = new Set();
+  for (const g of groups) {
+    for (const c of g.colors) {
+      const readable = c.id.split(COLOUR_SEP).join("-");
+      c.slug = seen.has(readable) ? c.id : readable;
+      seen.add(c.slug);
+    }
+  }
 }
 
 function applyAutoTags(groups, now) {
@@ -296,8 +359,13 @@ function queryCatalog(groups, query = {}) {
   let list = groups;
   const eq = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 
-  if (query.category) list = list.filter((g) => eq(g.category, query.category));
+  if (query.category) {
+    list = list.filter((g) => eq(g.category, query.category) || g.colors.some((c) => c._categories.some((x) => eq(x, query.category))));
+  }
   if (query.tag) list = list.filter((g) => g.tags.some((t) => eq(t, query.tag)));
+  if (query.age) {
+    list = list.filter((g) => g.colors.some((c) => c.sizes.some((s) => s.in_stock && s.ages.includes(query.age))));
+  }
   if (query.size) {
     list = list.filter((g) => g.colors.some((c) => c.sizes.some((s) => s.in_stock && eq(s.size, query.size))));
   }
@@ -340,6 +408,8 @@ function colourCards(groups) {
         mrp_min: c.mrp_min,
         mrp_max: c.mrp_max,
         price_min_mrp: c.price_min_mrp,
+        age_groups: c.age_groups,
+        slug: c.slug,
         colors: [c],
         _group: g,
         _shown_at: c._first_shown,
@@ -350,9 +420,13 @@ function colourCards(groups) {
   return cards;
 }
 
-/** Finds the group for a card id ("group--colour") or a plain group id. */
+/** Finds the group for a card id ("group--colour"), a colour's slug, or a plain group id. */
 function findProduct(groups, rawId) {
   const id = String(rawId || "").toLowerCase();
+  for (const g of groups) {
+    const bySlug = g.colors.find((c) => c.slug === id);
+    if (bySlug) return { group: g, selected_color: bySlug.id };
+  }
   const groupId = id.split(COLOUR_SEP)[0];
   const group = groups.find((g) => g.id === groupId);
   if (!group) return null;
@@ -361,7 +435,7 @@ function findProduct(groups, rawId) {
 }
 
 // Public shapes: strip internal fields.
-function publicColour({ _first_shown, _created, ...c }) {
+function publicColour({ _first_shown, _created, _categories, ...c }) {
   return c;
 }
 function toDetail(group) {
@@ -374,6 +448,7 @@ function toCard(card) {
   const all = _group ? _group.colors : card.colors;
   const swatch = (c) => ({
     id: c.id,
+    slug: c.slug,
     color: c.color,
     image: (c.media.find((m) => m.type === "image") || {}).url || null,
     in_stock: c.in_stock,
@@ -428,8 +503,19 @@ function filtersFrom(groups) {
   const categories = new Map();
   const tags = new Map();
   const sizes = new Map();
+  const ageCategories = new Map();
+  const agesByCategory = new Map(); // category -> its sizes, for that category's own age list
   for (const g of groups) {
     if (g.category) categories.set(g.category.toLowerCase(), g.category);
+    for (const c of g.colors) {
+      if (!c.age_groups.length) continue;
+      for (const cat of c._categories) {
+        if (!AGE_CATEGORY_SET.has(cat.toLowerCase())) continue;
+        ageCategories.set(cat.toLowerCase(), cat);
+        if (!agesByCategory.has(cat)) agesByCategory.set(cat, []);
+        agesByCategory.get(cat).push(...c.sizes);
+      }
+    }
     for (const t of g.tags) tags.set(t.toLowerCase(), t);
     for (const c of g.colors) for (const s of c.sizes) if (s.in_stock) sizes.set(s.size, s.size);
   }
@@ -440,6 +526,11 @@ function filtersFrom(groups) {
     categories: [...categories.values()].sort(byText),
     tags: [...tags.values()].sort(byText),
     sizes: [...sizes.values()].sort(bySize),
+    // Age filter: the groups in stock, and the categories it applies to.
+    ages: ageGroupsIn(groups.flatMap((g) => g.colors.flatMap((c) => c.sizes))),
+    age_categories: [...ageCategories.values()].sort(byText),
+    // Age ids in stock per children's category, e.g. { "Child Sandal": ["10m-2y", ...] }.
+    ages_by_category: Object.fromEntries([...agesByCategory].map(([cat, sz]) => [cat, ageGroupsIn(sz).map((a) => a.id)])),
     price: prices.length ? { min: Math.min(...prices), max: Math.max(...prices) } : null,
   };
 }
@@ -455,6 +546,7 @@ module.exports = {
   findProduct,
   clearCatalogCache,
   filtersFrom,
+  ageGroupsOf,
   slugify,
   priceOf,
   SAFE_PROJECTION,

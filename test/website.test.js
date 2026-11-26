@@ -128,6 +128,7 @@ test("product list shows one card per in-stock colour and hides internal fields"
   const [navy, black, flex] = json.items;
   assert.equal(navy.id, "comfort-7712--navy");
   assert.equal(navy.group_id, "comfort-7712");
+  assert.equal(navy.slug, "comfort-7712-navy", "readable link name");
   assert.equal(navy.price_min, 850);
   assert.deepEqual(navy.colors.map((c) => c.color), ["Navy", "Black"], "own colour first, then the others");
   assert.equal(black.id, "comfort-7712--black");
@@ -150,6 +151,8 @@ test("product detail merges size ranges of the same colour and lists all colours
   assert.equal(status, 200);
   assert.equal(json.product.selected_color, "comfort-7712--navy");
   assert.deepEqual(json.product.colors.map((c) => c.id), ["comfort-7712--black", "comfort-7712--navy"]);
+  // The readable link name opens the same colour.
+  assert.equal((await call("GET", "/public/products/comfort-7712-navy")).json.product.selected_color, "comfort-7712--navy");
   // A plain group id still works and opens the first colour.
   assert.equal((await call("GET", "/public/products/comfort-7712")).json.product.selected_color, "comfort-7712--black");
   assert.ok(!JSON.stringify(json).includes("_first_shown"), "internal fields stripped");
@@ -402,4 +405,25 @@ test("server refuses to start when a setting is missing", () => {
     process.env.WHATSAPP_NUMBER = saved;
   }
   assert.doesNotThrow(checkEnv);
+});
+
+test("age guide: children's size ranges map to the owner's age groups", () => {
+  const kid = (sizes, size_description = "S", category = "Child Sports Shoes") => ({
+    category,
+    size_description,
+    pairs_in_stock: sizes.map((size) => ({ size: String(size), quantity: 1 })),
+  });
+  const ages = (p) => catalog.ageGroupsOf(p);
+  assert.deepEqual(ages(kid([14, 15, 16, 17, 18, 19, 20])), ["10m-2y"]);
+  assert.deepEqual(ages(kid([17, 18, 19, 20, 21])), ["10m-2y"]);
+  assert.deepEqual(ages(kid([3, 4, 5, 6], "S")), ["10m-2y"], "small 3x6 is for babies");
+  assert.deepEqual(ages(kid([6, 7, 8, 9, 10, 11])), ["2-5y"]);
+  assert.deepEqual(ages(kid([11, 12, 13, 1, 2, 3, 4, 5], "M")), ["6-14y"]);
+  assert.deepEqual(ages(kid([2, 3, 4, 5], "M")), ["6-14y"], "a medium 2x5 is for older children");
+  assert.deepEqual(ages(kid([9, 10, 11, 12, 13, 1])), ["2-5y", "6-14y"]);
+  assert.deepEqual(ages(kid([24, 25, 26, 27, 28, 29])), [], "other size systems get no age");
+  assert.deepEqual(ages(kid([6, 7, 8, 9, 10], "S", "Gents Sports Shoes")), [], "adult categories get no age");
+  assert.deepEqual(ages({ ...kid([1]), age_group: "0-8m" }), ["0-8m"], "an age saved on the product wins");
+  assert.deepEqual(ages({ ...kid([6, 7, 8, 9, 10], "L", "School Shoes"), age_group: "none" }), [], "\"none\" means no age");
+  assert.deepEqual(ages(kid([1, 2, 3, 4, 5], "M", "School Shoes")), ["6-14y"]);
 });
